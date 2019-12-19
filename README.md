@@ -9,3 +9,4 @@ I was sick of having to do it manually :)
 * extract logic to dedicated classes and write unit tests
 * improve error handling
 * write to SQS instead of exporting a CSV to S3
+* implement categorize logic
