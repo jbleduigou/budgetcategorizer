@@ -14,7 +14,7 @@ vet: ## Run the vet tool
 clean: ## Clean up build artifacts
 	go clean
 
-build: clean check ## Build the executable
+build: clean ## Build the executable
 	GOOS=linux GOARCH=amd64 go build -o budgetcategorizer ./cmd/budgetcategorizer
 
 zip: build ## Zip the executable so that it can be uploaded to AWS Lambda
