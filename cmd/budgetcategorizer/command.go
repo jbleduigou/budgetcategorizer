@@ -24,19 +24,19 @@ type command struct {
 
 func (c *command) execute() {
 	//download file
-	content, _ := c.downloadFile(c.objectKey, c.bucketName, c.downloader)
+	content, _ := c.downloadFile(c.objectKey, c.bucketName)
 	//read transactions from file
 	transactions, _ := c.p.ParseTransactions(bytes.NewReader(content))
 	//write transactions to temp folder
 	resultFileName := c.getResultFileName(c.objectKey)
-	// writeResult(transactions, "/tmp/"+resultFileName)
+	//export transactions to proper csv format
 	output, _ := c.e.Export(transactions)
 	fmt.Printf("Output has size %v \n", len(output))
 	//	upload to s3
-	c.uploadResult(output, resultFileName, c.bucketName, c.uploader)
+	c.uploadResult(output, resultFileName, c.bucketName)
 }
 
-func (c *command) uploadResult(result []byte, fileName string, bucketName string, uploader s3manageriface.UploaderAPI) (string, error) {
+func (c *command) uploadResult(result []byte, fileName string, bucketName string) (string, error) {
 	r := bytes.NewReader(result)
 	objectKey := "output/" + fileName
 
@@ -45,7 +45,7 @@ func (c *command) uploadResult(result []byte, fileName string, bucketName string
 		Key:    &objectKey,
 		Body:   r,
 	}
-	o, err := uploader.Upload(upParams)
+	o, err := c.uploader.Upload(upParams)
 	if err != nil {
 		return "", err
 	}
@@ -61,10 +61,10 @@ func (c *command) getResultFileName(fileName string) string {
 	return string(resultFileName)
 }
 
-func (c *command) downloadFile(objectKey string, bucketName string, downloader s3manageriface.DownloaderAPI) ([]byte, error) {
+func (c *command) downloadFile(objectKey string, bucketName string) ([]byte, error) {
 	fmt.Printf("Downloading file '%v' from bucket '%v' \n", objectKey, bucketName)
 	buff := &aws.WriteAtBuffer{}
-	n, err := downloader.Download(buff, &s3.GetObjectInput{
+	n, err := c.downloader.Download(buff, &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String("input/" + objectKey),
 	})
