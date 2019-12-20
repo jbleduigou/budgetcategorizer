@@ -43,9 +43,11 @@ func execute(bucketName string, objectKey string, downloader *s3manager.Download
 	transactions := readTransactions(bytes.NewReader(content))
 	//write transactions to temp folder
 	resultFileName := getResultFileName(objectKey)
-	writeResult(transactions, "/tmp/"+resultFileName)
+	// writeResult(transactions, "/tmp/"+resultFileName)
+	output, _ := convertToCSV(transactions)
+	fmt.Printf("Output has size %v \n", len(output))
 	//	upload to s3
-	uploadResult(resultFileName, bucketName, uploader)
+	uploadResult(output, resultFileName, bucketName, uploader)
 }
 
 func downloadFile(objectKey string, bucketName string, downloader *s3manager.Downloader) ([]byte, error) {
@@ -61,7 +63,6 @@ func downloadFile(objectKey string, bucketName string, downloader *s3manager.Dow
 	}
 	fmt.Printf("File %v downloaded, read %d bytes\n", objectKey, n)
 	return buff.Bytes(), nil
-
 }
 
 func readTransactions(r io.Reader) (transactions []*budget.Transaction) {
@@ -137,22 +138,22 @@ func parseAmount(a string) (float64, error) {
 	return credit, err
 }
 
-func writeResult(transactions []*budget.Transaction, fileName string) {
-	fmt.Printf("Writing result to file %v \n", fileName)
-	file, err := os.Create(fileName)
-	checkError("Cannot create file", err)
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
+func convertToCSV(transactions []*budget.Transaction) ([]byte, error) {
+	var b bytes.Buffer
+	writer := csv.NewWriter(&b)
 
 	for _, value := range transactions {
 		tunasse := strconv.FormatFloat(value.Value, 'f', -1, 64)
 
 		line := []string{value.Date, value.Description, value.Comment, value.Category, string(tunasse)}
 		err := writer.Write(line)
-		checkError("Cannot write to file", err)
+		if err != nil {
+			fmt.Printf("%v\n", err)
+			return nil, err
+		}
 	}
+	writer.Flush()
+	return b.Bytes(), nil
 }
 
 func checkError(message string, err error) {
@@ -161,17 +162,14 @@ func checkError(message string, err error) {
 	}
 }
 
-func uploadResult(fileName string, bucketName string, uploader *s3manager.Uploader) (string, error) {
-	file, err := os.Open("/tmp/" + fileName)
-	checkError("Cannot open file", err)
-	defer file.Close()
-
+func uploadResult(result []byte, fileName string, bucketName string, uploader *s3manager.Uploader) (string, error) {
+	r := bytes.NewReader(result)
 	objectKey := "output/" + fileName
 
 	upParams := &s3manager.UploadInput{
 		Bucket: &bucketName,
 		Key:    &objectKey,
-		Body:   file,
+		Body:   r,
 	}
 	o, err := uploader.Upload(upParams)
 	if err != nil {
