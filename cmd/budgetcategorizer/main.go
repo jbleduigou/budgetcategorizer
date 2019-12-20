@@ -3,10 +3,8 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/csv"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -16,7 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
-	budget "github.com/jbleduigou/budgetcategorizer"
+	"github.com/jbleduigou/budgetcategorizer/exporter"
 	"github.com/jbleduigou/budgetcategorizer/parser"
 )
 
@@ -25,10 +23,11 @@ func handler(ctx context.Context, s3Event events.S3Event) {
 	downloader := s3manager.NewDownloader(sess)
 	uploader := s3manager.NewUploader(sess)
 	parser := parser.NewParser()
+	exporter := exporter.NewExporter()
 	for _, record := range s3Event.Records {
 		s3event := record.S3
 		objectKey := strings.ReplaceAll(s3event.Object.Key, "input/", "")
-		execute(s3event.Bucket.Name, objectKey, downloader, uploader, parser)
+		execute(s3event.Bucket.Name, objectKey, downloader, uploader, parser, exporter)
 	}
 }
 
@@ -37,7 +36,7 @@ func main() {
 	lambda.Start(handler)
 }
 
-func execute(bucketName string, objectKey string, downloader s3manageriface.DownloaderAPI, uploader s3manageriface.UploaderAPI, p parser.Parser) {
+func execute(bucketName string, objectKey string, downloader s3manageriface.DownloaderAPI, uploader s3manageriface.UploaderAPI, p parser.Parser, e exporter.Exporter) {
 	//download file
 	content, _ := downloadFile(objectKey, bucketName, downloader)
 	//read transactions from file
@@ -45,7 +44,7 @@ func execute(bucketName string, objectKey string, downloader s3manageriface.Down
 	//write transactions to temp folder
 	resultFileName := getResultFileName(objectKey)
 	// writeResult(transactions, "/tmp/"+resultFileName)
-	output, _ := convertToCSV(transactions)
+	output, _ := e.Export(transactions)
 	fmt.Printf("Output has size %v \n", len(output))
 	//	upload to s3
 	uploadResult(output, resultFileName, bucketName, uploader)
@@ -71,24 +70,6 @@ func getResultFileName(fileName string) string {
 	re := regexp.MustCompile(`(\.CSV)`)
 	resultFileName = re.ReplaceAll(resultFileName, []byte("-result.txt"))
 	return string(resultFileName)
-}
-
-func convertToCSV(transactions []*budget.Transaction) ([]byte, error) {
-	var b bytes.Buffer
-	writer := csv.NewWriter(&b)
-
-	for _, value := range transactions {
-		tunasse := strconv.FormatFloat(value.Value, 'f', -1, 64)
-
-		line := []string{value.Date, value.Description, value.Comment, value.Category, string(tunasse)}
-		err := writer.Write(line)
-		if err != nil {
-			fmt.Printf("%v\n", err)
-			return nil, err
-		}
-	}
-	writer.Flush()
-	return b.Bytes(), nil
 }
 
 func uploadResult(result []byte, fileName string, bucketName string, uploader s3manageriface.UploaderAPI) (string, error) {
