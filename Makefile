@@ -3,7 +3,7 @@
 check: test lint vet ## Runs all tests
 
 test: ## Run the unit tests
-	go test -race -v $(shell go list ./... | grep -v /vendor/)
+	go test -cover -v $(shell go list ./... | grep -v /vendor/)
 
 lint: ## Lint all files
 	go list ./... | grep -v /vendor/ | xargs -L1 /Users/jbleduig/go/bin/golint -set_exit_status
