@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strconv"
@@ -36,9 +38,9 @@ func main() {
 
 func execute(bucketName string, objectKey string, downloader *s3manager.Downloader, uploader *s3manager.Uploader) {
 	//download file
-	downloadFile(objectKey, bucketName, downloader)
+	content, _ := downloadFile(objectKey, bucketName, downloader)
 	//read transactions from file
-	transactions := readTransactions("/tmp/" + objectKey)
+	transactions := readTransactions(bytes.NewReader(content))
 	//write transactions to temp folder
 	resultFileName := getResultFileName(objectKey)
 	writeResult(transactions, "/tmp/"+resultFileName)
@@ -46,36 +48,24 @@ func execute(bucketName string, objectKey string, downloader *s3manager.Download
 	uploadResult(resultFileName, bucketName, uploader)
 }
 
-func downloadFile(objectKey string, bucketName string, downloader *s3manager.Downloader) {
+func downloadFile(objectKey string, bucketName string, downloader *s3manager.Downloader) ([]byte, error) {
 	{
-		f, err := os.Create("/tmp/" + objectKey)
-		if err != nil {
-			fmt.Printf("failed to create file %q, %v\n", objectKey, err)
-		}
-		// Write the contents of S3 Object to the file
-		n, err := downloader.Download(f, &s3.GetObjectInput{
+		buff := &aws.WriteAtBuffer{}
+		n, err := downloader.Download(buff, &s3.GetObjectInput{
 			Bucket: aws.String(bucketName),
 			Key:    aws.String("input/" + objectKey),
 		})
 		if err != nil {
 			fmt.Printf("failed to download file\n, %v", err)
+			return nil, err
 		}
 		fmt.Printf("file downloaded, %d bytes\n", n)
+		return buff.Bytes(), nil
 	}
 }
 
-func readTransactions(sourceFile string) (transactions []*budget.Transaction) {
-	fmt.Printf("Now processing file %v \n", sourceFile)
-	csvfile, err := os.Open(sourceFile)
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	defer csvfile.Close()
-
-	reader := csv.NewReader(csvfile)
+func readTransactions(r io.Reader) (transactions []*budget.Transaction) {
+	reader := csv.NewReader(r)
 	reader.LazyQuotes = true
 	reader.Comma = ';'
 	reader.FieldsPerRecord = 4
