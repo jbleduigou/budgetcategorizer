@@ -5,8 +5,6 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
-	"io"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -18,16 +16,18 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	budget "github.com/jbleduigou/budgetcategorizer"
+	"github.com/jbleduigou/budgetcategorizer/parser"
 )
 
 func handler(ctx context.Context, s3Event events.S3Event) {
 	sess := session.Must(session.NewSession())
 	downloader := s3manager.NewDownloader(sess)
 	uploader := s3manager.NewUploader(sess)
+	parser := parser.NewParser()
 	for _, record := range s3Event.Records {
 		s3event := record.S3
 		objectKey := strings.ReplaceAll(s3event.Object.Key, "input/", "")
-		execute(s3event.Bucket.Name, objectKey, downloader, uploader)
+		execute(s3event.Bucket.Name, objectKey, downloader, uploader, parser)
 	}
 }
 
@@ -36,11 +36,11 @@ func main() {
 	lambda.Start(handler)
 }
 
-func execute(bucketName string, objectKey string, downloader *s3manager.Downloader, uploader *s3manager.Uploader) {
+func execute(bucketName string, objectKey string, downloader *s3manager.Downloader, uploader *s3manager.Uploader, p parser.Parser) {
 	//download file
 	content, _ := downloadFile(objectKey, bucketName, downloader)
 	//read transactions from file
-	transactions := readTransactions(bytes.NewReader(content))
+	transactions, _ := p.ParseTransactions(bytes.NewReader(content))
 	//write transactions to temp folder
 	resultFileName := getResultFileName(objectKey)
 	// writeResult(transactions, "/tmp/"+resultFileName)
@@ -65,49 +65,6 @@ func downloadFile(objectKey string, bucketName string, downloader *s3manager.Dow
 	return buff.Bytes(), nil
 }
 
-func readTransactions(r io.Reader) (transactions []*budget.Transaction) {
-	reader := csv.NewReader(r)
-	reader.LazyQuotes = true
-	reader.Comma = ';'
-	reader.FieldsPerRecord = 4
-
-	reader.FieldsPerRecord = -1
-
-	rawCSVdata, err := reader.ReadAll()
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	for _, each := range rawCSVdata {
-		if len(each) == 4 {
-			date := each[0]
-			libelle := sanitizeDescription(each[1])
-			debit, err := parseAmount(each[2])
-			if err != nil {
-				fmt.Printf("%v\n", err)
-			}
-			t := budget.NewTransaction(date, libelle, "", "Courses Alimentation", debit)
-			transactions = append(transactions, t)
-		}
-		if len(each) == 5 {
-			date := each[0]
-			if "Date" != date {
-				libelle := sanitizeDescription(each[1])
-				credit, err := parseAmount(each[3])
-				if err != nil {
-					fmt.Printf("%v\n", err)
-				}
-				t := budget.NewTransaction(date, libelle, "", "", -credit)
-				transactions = append(transactions, t)
-			}
-		}
-	}
-	fmt.Printf("Found %v transactions\n", len(transactions))
-	return transactions
-}
-
 func getResultFileName(fileName string) string {
 	resultFileName := []byte(fileName)
 	re := regexp.MustCompile(`(\.CSV)`)
@@ -126,16 +83,6 @@ func sanitizeDescription(d string) string {
 		libelle = re.ReplaceAll(libelle, []byte(" "))
 	}
 	return string(libelle)
-}
-
-func parseAmount(a string) (float64, error) {
-	creditStr := []byte(a)
-	{
-		re := regexp.MustCompile(`,`)
-		creditStr = re.ReplaceAll(creditStr, []byte("."))
-	}
-	credit, err := strconv.ParseFloat(string(creditStr), 64)
-	return credit, err
 }
 
 func convertToCSV(transactions []*budget.Transaction) ([]byte, error) {
