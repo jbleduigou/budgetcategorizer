@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	budget "github.com/jbleduigou/budgetcategorizer"
 	"github.com/jbleduigou/budgetcategorizer/parser"
 )
@@ -36,7 +37,7 @@ func main() {
 	lambda.Start(handler)
 }
 
-func execute(bucketName string, objectKey string, downloader *s3manager.Downloader, uploader *s3manager.Uploader, p parser.Parser) {
+func execute(bucketName string, objectKey string, downloader s3manageriface.DownloaderAPI, uploader s3manageriface.UploaderAPI, p parser.Parser) {
 	//download file
 	content, _ := downloadFile(objectKey, bucketName, downloader)
 	//read transactions from file
@@ -50,7 +51,7 @@ func execute(bucketName string, objectKey string, downloader *s3manager.Download
 	uploadResult(output, resultFileName, bucketName, uploader)
 }
 
-func downloadFile(objectKey string, bucketName string, downloader *s3manager.Downloader) ([]byte, error) {
+func downloadFile(objectKey string, bucketName string, downloader s3manageriface.DownloaderAPI) ([]byte, error) {
 	fmt.Printf("Downloading file '%v' from bucket '%v' \n", objectKey, bucketName)
 	buff := &aws.WriteAtBuffer{}
 	n, err := downloader.Download(buff, &s3.GetObjectInput{
@@ -72,19 +73,6 @@ func getResultFileName(fileName string) string {
 	return string(resultFileName)
 }
 
-func sanitizeDescription(d string) string {
-	libelle := []byte(d)
-	{
-		re := regexp.MustCompile(`\n`)
-		libelle = re.ReplaceAll(libelle, []byte(" "))
-	}
-	{
-		re := regexp.MustCompile(`[\s]+`)
-		libelle = re.ReplaceAll(libelle, []byte(" "))
-	}
-	return string(libelle)
-}
-
 func convertToCSV(transactions []*budget.Transaction) ([]byte, error) {
 	var b bytes.Buffer
 	writer := csv.NewWriter(&b)
@@ -103,13 +91,7 @@ func convertToCSV(transactions []*budget.Transaction) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-func checkError(message string, err error) {
-	if err != nil {
-		fmt.Printf("%v\n", err)
-	}
-}
-
-func uploadResult(result []byte, fileName string, bucketName string, uploader *s3manager.Uploader) (string, error) {
+func uploadResult(result []byte, fileName string, bucketName string, uploader s3manageriface.UploaderAPI) (string, error) {
 	r := bytes.NewReader(result)
 	objectKey := "output/" + fileName
 
