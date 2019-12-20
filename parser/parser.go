@@ -14,6 +14,10 @@ type Parser interface {
 	ParseTransactions(r io.Reader) ([]*budget.Transaction, error)
 }
 
+type csvreader interface {
+	ReadAll() (records [][]string, err error)
+}
+
 type csvParser struct {
 }
 
@@ -30,7 +34,7 @@ func (c *csvParser) ParseTransactions(r io.Reader) ([]*budget.Transaction, error
 	return c.parse(reader)
 }
 
-func (c *csvParser) parse(reader *csv.Reader) (transactions []*budget.Transaction, err error) {
+func (c *csvParser) parse(reader csvreader) (transactions []*budget.Transaction, err error) {
 	rawCSVdata, err := reader.ReadAll()
 
 	if err != nil {

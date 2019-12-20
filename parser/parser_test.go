@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -23,6 +24,20 @@ func TestParseTransactions(t *testing.T) {
 	assert.Equal(t, credit.Comment, "")
 	assert.Equal(t, credit.Category, "")
 	assert.Equal(t, credit.Value, -30.13)
+}
+
+type mockReaderWithError struct {
+}
+
+func (m *mockReaderWithError) ReadAll() (records [][]string, err error) {
+	return nil, fmt.Errorf("Error for unit tests")
+}
+
+func TestParseTransactionsWithError(t *testing.T) {
+	p := csvParser{}
+	transactions, err := p.parse(&mockReaderWithError{})
+	assert.Nil(t, transactions)
+	assert.Equal(t, err.Error(), "Error for unit tests")
 }
 
 var content = `
