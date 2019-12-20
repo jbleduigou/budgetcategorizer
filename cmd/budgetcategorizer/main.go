@@ -49,19 +49,19 @@ func execute(bucketName string, objectKey string, downloader *s3manager.Download
 }
 
 func downloadFile(objectKey string, bucketName string, downloader *s3manager.Downloader) ([]byte, error) {
-	{
-		buff := &aws.WriteAtBuffer{}
-		n, err := downloader.Download(buff, &s3.GetObjectInput{
-			Bucket: aws.String(bucketName),
-			Key:    aws.String("input/" + objectKey),
-		})
-		if err != nil {
-			fmt.Printf("failed to download file\n, %v", err)
-			return nil, err
-		}
-		fmt.Printf("file downloaded, %d bytes\n", n)
-		return buff.Bytes(), nil
+	fmt.Printf("Downloading file '%v' from bucket '%v' \n", objectKey, bucketName)
+	buff := &aws.WriteAtBuffer{}
+	n, err := downloader.Download(buff, &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String("input/" + objectKey),
+	})
+	if err != nil {
+		fmt.Printf("Failed to download file %v\n, %v", objectKey, err)
+		return nil, err
 	}
+	fmt.Printf("File %v downloaded, read %d bytes\n", objectKey, n)
+	return buff.Bytes(), nil
+
 }
 
 func readTransactions(r io.Reader) (transactions []*budget.Transaction) {
