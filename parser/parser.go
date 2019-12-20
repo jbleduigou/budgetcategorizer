@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"os"
 	"regexp"
 	"strconv"
 
@@ -35,8 +34,7 @@ func (c *csvParser) parse(reader *csv.Reader) (transactions []*budget.Transactio
 	rawCSVdata, err := reader.ReadAll()
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return nil, err
 	}
 
 	for _, each := range rawCSVdata {
@@ -44,22 +42,24 @@ func (c *csvParser) parse(reader *csv.Reader) (transactions []*budget.Transactio
 			date := each[0]
 			libelle := c.sanitizeDescription(each[1])
 			debit, err := c.parseAmount(each[2])
-			if err != nil {
+			if err == nil {
+				t := budget.NewTransaction(date, libelle, "", "Courses Alimentation", debit)
+				transactions = append(transactions, t)
+			} else {
 				fmt.Printf("%v\n", err)
 			}
-			t := budget.NewTransaction(date, libelle, "", "Courses Alimentation", debit)
-			transactions = append(transactions, t)
 		}
 		if len(each) == 5 {
 			date := each[0]
 			if "Date" != date {
 				libelle := c.sanitizeDescription(each[1])
 				credit, err := c.parseAmount(each[3])
-				if err != nil {
+				if err == nil {
+					t := budget.NewTransaction(date, libelle, "", "", -credit)
+					transactions = append(transactions, t)
+				} else {
 					fmt.Printf("%v\n", err)
 				}
-				t := budget.NewTransaction(date, libelle, "", "", -credit)
-				transactions = append(transactions, t)
 			}
 		}
 	}
