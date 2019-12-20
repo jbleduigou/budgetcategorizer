@@ -36,6 +36,28 @@ func (c *command) execute() {
 	c.uploadResult(output, resultFileName, c.bucketName)
 }
 
+func (c *command) downloadFile(objectKey string, bucketName string) ([]byte, error) {
+	fmt.Printf("Downloading file '%v' from bucket '%v' \n", objectKey, bucketName)
+	buff := &aws.WriteAtBuffer{}
+	n, err := c.downloader.Download(buff, &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String("input/" + objectKey),
+	})
+	if err != nil {
+		fmt.Printf("Failed to download file %v\n, %v", objectKey, err)
+		return nil, err
+	}
+	fmt.Printf("File %v downloaded, read %d bytes\n", objectKey, n)
+	return buff.Bytes(), nil
+}
+
+func (c *command) getResultFileName(fileName string) string {
+	resultFileName := []byte(fileName)
+	re := regexp.MustCompile(`(\.CSV)`)
+	resultFileName = re.ReplaceAll(resultFileName, []byte("-result.txt"))
+	return string(resultFileName)
+}
+
 func (c *command) uploadResult(result []byte, fileName string, bucketName string) (string, error) {
 	r := bytes.NewReader(result)
 	objectKey := "output/" + fileName
@@ -52,26 +74,4 @@ func (c *command) uploadResult(result []byte, fileName string, bucketName string
 	fmt.Printf("Success uploading file to location %v \n", o.Location)
 
 	return fileName, err
-}
-
-func (c *command) getResultFileName(fileName string) string {
-	resultFileName := []byte(fileName)
-	re := regexp.MustCompile(`(\.CSV)`)
-	resultFileName = re.ReplaceAll(resultFileName, []byte("-result.txt"))
-	return string(resultFileName)
-}
-
-func (c *command) downloadFile(objectKey string, bucketName string) ([]byte, error) {
-	fmt.Printf("Downloading file '%v' from bucket '%v' \n", objectKey, bucketName)
-	buff := &aws.WriteAtBuffer{}
-	n, err := c.downloader.Download(buff, &s3.GetObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String("input/" + objectKey),
-	})
-	if err != nil {
-		fmt.Printf("Failed to download file %v\n, %v", objectKey, err)
-		return nil, err
-	}
-	fmt.Printf("File %v downloaded, read %d bytes\n", objectKey, n)
-	return buff.Bytes(), nil
 }
