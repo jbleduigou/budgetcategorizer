@@ -16,6 +16,9 @@ type MockUploader struct {
 
 func (_m *MockUploader) Upload(_a0 *s3manager.UploadInput, _a1 ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
 	ret := _m.Called(_a0, _a1)
+	if ret.Get(1) != nil {
+		return ret.Get(0).(*s3manager.UploadOutput), ret.Get(1).(error)
+	}
 	return ret.Get(0).(*s3manager.UploadOutput), nil
 }
 

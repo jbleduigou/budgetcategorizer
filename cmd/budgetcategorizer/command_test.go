@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -31,6 +32,20 @@ func TestDownloadFile(t *testing.T) {
 	m.AssertExpectations(t)
 }
 
+func TestDownloadFileWithError(t *testing.T) {
+	m := mock.NewDownloader()
+	m.On("Download",
+		mock.Anything,
+		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("input/CA20191220_1142.CSV")},
+		mock.Anything).Return(int64(0), fmt.Errorf("error for unit test"))
+	c := &command{downloader: m}
+
+	content, err := c.downloadFile("CA20191220_1142.CSV", "mybucket")
+	assert.Equal(t, []byte(nil), content)
+	assert.Equal(t, "error for unit test", err.Error())
+	m.AssertExpectations(t)
+}
+
 func TestUploadFile(t *testing.T) {
 	m := mock.NewUploader()
 	m.On("Upload", mock.Anything, mock.Anything).Return(&s3manager.UploadOutput{Location: ""}, nil)
@@ -38,5 +53,15 @@ func TestUploadFile(t *testing.T) {
 
 	err := c.uploadResult([]byte("test"), "CA20191220_1142-result.txt", "mybucket")
 	assert.Nil(t, err)
+	m.AssertExpectations(t)
+}
+
+func TestUploadFileWithError(t *testing.T) {
+	m := mock.NewUploader()
+	m.On("Upload", mock.Anything, mock.Anything).Return(&s3manager.UploadOutput{Location: ""}, fmt.Errorf("error for unit test"))
+	c := &command{uploader: m}
+
+	err := c.uploadResult([]byte("test"), "CA20191220_1142-result.txt", "mybucket")
+	assert.Equal(t, "error for unit test", err.Error())
 	m.AssertExpectations(t)
 }
