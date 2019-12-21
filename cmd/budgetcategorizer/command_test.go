@@ -36,8 +36,7 @@ func TestUploadFile(t *testing.T) {
 	m.On("Upload", mock.Anything, mock.Anything).Return(&s3manager.UploadOutput{Location: ""}, nil)
 	c := &command{uploader: m}
 
-	fileName, err := c.uploadResult([]byte("test"), "CA20191220_1142-result.txt", "mybucket")
-	assert.Equal(t, "CA20191220_1142-result.txt", fileName)
+	err := c.uploadResult([]byte("test"), "CA20191220_1142-result.txt", "mybucket")
 	assert.Nil(t, err)
 	m.AssertExpectations(t)
 }

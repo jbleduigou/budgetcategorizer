@@ -58,7 +58,7 @@ func (c *command) getResultFileName(fileName string) string {
 	return string(resultFileName)
 }
 
-func (c *command) uploadResult(result []byte, fileName string, bucketName string) (string, error) {
+func (c *command) uploadResult(result []byte, fileName string, bucketName string) error {
 	r := bytes.NewReader(result)
 	objectKey := "output/" + fileName
 
@@ -69,9 +69,8 @@ func (c *command) uploadResult(result []byte, fileName string, bucketName string
 	}
 	o, err := c.uploader.Upload(upParams)
 	if err != nil {
-		return "", err
+		return err
 	}
 	fmt.Printf("Success uploading file to location %v \n", o.Location)
-
-	return fileName, err
+	return nil
 }
