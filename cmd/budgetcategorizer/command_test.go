@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	budget "github.com/jbleduigou/budgetcategorizer"
 	"github.com/jbleduigou/budgetcategorizer/mock"
 	"github.com/stretchr/testify/assert"
 )
@@ -64,4 +65,27 @@ func TestUploadFileWithError(t *testing.T) {
 	err := c.uploadResult([]byte("test"), "CA20191220_1142-result.txt", "mybucket")
 	assert.Equal(t, "error for unit test", err.Error())
 	m.AssertExpectations(t)
+}
+
+//TODO use better return values and arguments for mocks
+func TestExecute(t *testing.T) {
+	d := mock.NewDownloader()
+	d.On("Download",
+		mock.Anything,
+		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("input/CA20191220_1142.CSV")},
+		mock.Anything).Return(int64(1337), nil)
+	p := mock.NewParser()
+	p.On("ParseTransactions", mock.Anything).Return([]*budget.Transaction{}, nil)
+	e := mock.NewExporter()
+	e.On("Export", mock.Anything, mock.Anything).Return([]byte(""), nil)
+	u := mock.NewUploader()
+	u.On("Upload", mock.Anything, mock.Anything).Return(&s3manager.UploadOutput{Location: ""}, nil)
+	c := &command{downloader: d, p: p, e: e, uploader: u, bucketName: "mybucket", objectKey: "CA20191220_1142.CSV"}
+
+	c.execute()
+
+	d.AssertExpectations(t)
+	p.AssertExpectations(t)
+	e.AssertExpectations(t)
+	u.AssertExpectations(t)
 }
