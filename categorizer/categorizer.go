@@ -10,11 +10,8 @@ type Categorizer interface {
 	Categorize(t budget.Transaction) budget.Transaction
 }
 
-func NewCategorizer() Categorizer {
-	l := make(map[string]string)
-	// TODO make it parametable
-	l["Express Proxi Saint Thonan"] = "Courses Alimentation"
-	return &categorizerImpl{libelles: l}
+func NewCategorizer(libelles map[string]string) Categorizer {
+	return &categorizerImpl{libelles: libelles}
 }
 
 type categorizerImpl struct {

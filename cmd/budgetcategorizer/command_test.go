@@ -81,7 +81,8 @@ func TestExecute(t *testing.T) {
 	e.On("Export", mock.Anything, mock.Anything).Return([]byte(""), nil)
 	u := mock.NewUploader()
 	u.On("Upload", mock.Anything, mock.Anything).Return(&s3manager.UploadOutput{Location: ""}, nil)
-	cat := categorizer.NewCategorizer()
+	keywords := make(map[string]string)
+	cat := categorizer.NewCategorizer(keywords)
 	c := &command{downloader: d, parser: p, exporter: e, uploader: u, bucketName: "mybucket", objectKey: "CA20191220_1142.CSV", categorizer: cat}
 
 	c.execute()
