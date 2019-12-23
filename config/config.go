@@ -32,7 +32,7 @@ func GetConfiguration(downloader s3manageriface.DownloaderAPI) Configuration {
 				Bucket: aws.String(bucket),
 				Key:    aws.String(objectKey),
 			})
-			if err != nil {
+			if err == nil {
 				fmt.Printf("Download configuration file '%s' from bucket '%s' \n", objectKey, bucket)
 				return parseConfiguration([]byte(buff.Bytes()))
 			}
