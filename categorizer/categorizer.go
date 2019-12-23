@@ -1,6 +1,7 @@
 package categorizer
 
 import (
+	"fmt"
 	"strings"
 
 	budget "github.com/jbleduigou/budgetcategorizer"
@@ -23,8 +24,10 @@ func (c *categorizerImpl) Categorize(t budget.Transaction) budget.Transaction {
 	for key, value := range c.libelles {
 		if strings.Contains(t.Description, key) {
 			output.Category = value
+			fmt.Printf("Assigning category '%s' to transaction with description '%s'\n", value, t.Description)
 			return *output
 		}
 	}
+	fmt.Printf("No matching categories found for transaction with description '%s'\n", t.Description)
 	return *output
 }

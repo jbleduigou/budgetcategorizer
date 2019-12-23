@@ -33,16 +33,20 @@ func GetConfiguration(downloader s3manageriface.DownloaderAPI) Configuration {
 				Key:    aws.String(objectKey),
 			})
 			if err == nil {
-				fmt.Printf("Download configuration file '%s' from bucket '%s' \n", objectKey, bucket)
+				fmt.Printf("Downloaded configuration file '%s' from bucket '%s' \n", objectKey, bucket)
 				return parseConfiguration([]byte(buff.Bytes()))
 			}
 		}
 	}
+	fmt.Printf("Using default configuration \n")
 	return parseConfiguration([]byte(defaultConfiguration))
 }
 
 func parseConfiguration(yml []byte) Configuration {
 	c := Configuration{}
 	yaml.Unmarshal(yml, &c)
+	for _, v := range c.Categories {
+		c.Keywords[v] = v
+	}
 	return c
 }
