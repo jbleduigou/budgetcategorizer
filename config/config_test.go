@@ -8,13 +8,13 @@ import (
 )
 
 func TestGetConfigurationShouldUseDefault(t *testing.T) {
-	configuration := GetConfiguration(mock.NewDownloader())
+	configuration := GetConfiguration(mock.NewDownloader(""))
 
 	fmt.Println(configuration)
 }
 
 func TestGetConfigurationShouldDownload(t *testing.T) {
-	configuration := GetConfiguration(mock.NewDownloader())
+	configuration := GetConfiguration(mock.NewDownloader(""))
 
 	fmt.Println(configuration)
 }

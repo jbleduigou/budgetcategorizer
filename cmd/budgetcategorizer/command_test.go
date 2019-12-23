@@ -21,7 +21,7 @@ func TestGetResultFileName(t *testing.T) {
 }
 
 func TestDownloadFile(t *testing.T) {
-	m := mock.NewDownloader()
+	m := mock.NewDownloader("test")
 	m.On("Download",
 		mock.Anything,
 		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("input/CA20191220_1142.CSV")},
@@ -35,7 +35,7 @@ func TestDownloadFile(t *testing.T) {
 }
 
 func TestDownloadFileWithError(t *testing.T) {
-	m := mock.NewDownloader()
+	m := mock.NewDownloader("")
 	m.On("Download",
 		mock.Anything,
 		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("input/CA20191220_1142.CSV")},
@@ -70,7 +70,7 @@ func TestUploadFileWithError(t *testing.T) {
 
 //TODO use better return values and arguments for mocks
 func TestExecute(t *testing.T) {
-	d := mock.NewDownloader()
+	d := mock.NewDownloader("")
 	d.On("Download",
 		mock.Anything,
 		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("input/CA20191220_1142.CSV")},

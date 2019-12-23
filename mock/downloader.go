@@ -15,17 +15,18 @@ const (
 	Anything = "mock.Anything"
 )
 
-func NewDownloader() *MockDownloader {
-	return &MockDownloader{}
+func NewDownloader(content string) *MockDownloader {
+	return &MockDownloader{content: content}
 }
 
 type MockDownloader struct {
 	mock.Mock
+	content string
 }
 
 func (_m *MockDownloader) Download(_a0 io.WriterAt, _a1 *s3.GetObjectInput, _a2 ...func(*s3manager.Downloader)) (int64, error) {
 	ret := _m.Called(_a0, _a1, _a2)
-	_a0.WriteAt([]byte("test"), 0)
+	_a0.WriteAt([]byte(_m.content), 0)
 	if ret.Get(1) != nil {
 		return ret.Get(0).(int64), ret.Get(1).(error)
 	}
@@ -34,6 +35,6 @@ func (_m *MockDownloader) Download(_a0 io.WriterAt, _a1 *s3.GetObjectInput, _a2 
 
 func (_m *MockDownloader) DownloadWithContext(_a0 aws.Context, _a1 io.WriterAt, _a2 *s3.GetObjectInput, _a3 ...func(*s3manager.Downloader)) (int64, error) {
 	ret := _m.Called(_a0, _a1, _a2, _a3)
-	_a1.WriteAt([]byte("test"), 0)
+	_a1.WriteAt([]byte(_m.content), 0)
 	return ret.Get(0).(int64), ret.Get(1).(error)
 }
