@@ -10,3 +10,7 @@ I was sick of having to do it manually :)
 * improve error handling
 * write to SQS instead of exporting a CSV to S3
 * implement categorize logic
+
+## License
+Licensed under the Apache License, Version 2.0.
+Copyright 2019 Jean-Baptiste Le Duigou
