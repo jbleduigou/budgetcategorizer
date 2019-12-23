@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	budget "github.com/jbleduigou/budgetcategorizer"
+	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/jbleduigou/budgetcategorizer/mock"
 	"github.com/stretchr/testify/assert"
 )
@@ -80,7 +81,8 @@ func TestExecute(t *testing.T) {
 	e.On("Export", mock.Anything, mock.Anything).Return([]byte(""), nil)
 	u := mock.NewUploader()
 	u.On("Upload", mock.Anything, mock.Anything).Return(&s3manager.UploadOutput{Location: ""}, nil)
-	c := &command{downloader: d, p: p, e: e, uploader: u, bucketName: "mybucket", objectKey: "CA20191220_1142.CSV"}
+	cat := categorizer.NewCategorizer()
+	c := &command{downloader: d, parser: p, exporter: e, uploader: u, bucketName: "mybucket", objectKey: "CA20191220_1142.CSV", categorizer: cat}
 
 	c.execute()
 

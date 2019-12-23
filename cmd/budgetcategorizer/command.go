@@ -9,28 +9,33 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
+	budget "github.com/jbleduigou/budgetcategorizer"
+	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/jbleduigou/budgetcategorizer/exporter"
 	"github.com/jbleduigou/budgetcategorizer/parser"
 )
 
 type command struct {
-	bucketName string
-	objectKey  string
-	downloader s3manageriface.DownloaderAPI
-	uploader   s3manageriface.UploaderAPI
-	p          parser.Parser
-	e          exporter.Exporter
+	bucketName  string
+	objectKey   string
+	downloader  s3manageriface.DownloaderAPI
+	uploader    s3manageriface.UploaderAPI
+	parser      parser.Parser
+	categorizer categorizer.Categorizer
+	exporter    exporter.Exporter
 }
 
 func (c *command) execute() {
 	//download file
 	content, _ := c.downloadFile(c.objectKey, c.bucketName)
 	//read transactions from file
-	transactions, _ := c.p.ParseTransactions(bytes.NewReader(content))
+	transactions, _ := c.parser.ParseTransactions(bytes.NewReader(content))
+	//categorize transactions
+	categorized := mapTransactions(transactions, c.categorizer.Categorize)
 	//write transactions to temp folder
 	resultFileName := c.getResultFileName(c.objectKey)
 	//export transactions to proper csv format
-	output, _ := c.e.Export(transactions)
+	output, _ := c.exporter.Export(categorized)
 	fmt.Printf("Output has size %v \n", len(output))
 	//	upload to s3
 	c.uploadResult(output, resultFileName, c.bucketName)
@@ -73,4 +78,13 @@ func (c *command) uploadResult(result []byte, fileName string, bucketName string
 	}
 	fmt.Printf("Success uploading file to location %v \n", o.Location)
 	return nil
+}
+
+func mapTransactions(input []*budget.Transaction, f func(budget.Transaction) budget.Transaction) []*budget.Transaction {
+	output := make([]*budget.Transaction, len(input))
+	for i, v := range input {
+		var result = f(*v)
+		output[i] = &result
+	}
+	return output
 }

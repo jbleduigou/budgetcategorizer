@@ -7,7 +7,7 @@ import (
 )
 
 type Categorizer interface {
-	Categorize(t budget.Transaction) (budget.Transaction, error)
+	Categorize(t budget.Transaction) budget.Transaction
 }
 
 func NewCategorizer() Categorizer {
@@ -21,13 +21,13 @@ type categorizerImpl struct {
 	libelles map[string]string
 }
 
-func (c *categorizerImpl) Categorize(t budget.Transaction) (budget.Transaction, error) {
+func (c *categorizerImpl) Categorize(t budget.Transaction) budget.Transaction {
 	output := budget.NewTransaction(t.Date, t.Description, t.Comment, "???", t.Value)
 	for key, value := range c.libelles {
 		if strings.Contains(t.Description, key) {
 			output.Category = value
-			return *output, nil
+			return *output
 		}
 	}
-	return *output, nil
+	return *output
 }
