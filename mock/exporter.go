@@ -13,7 +13,7 @@ type MockExporter struct {
 	mock.Mock
 }
 
-func (_m *MockExporter) Export(_a0 []*budget.Transaction) ([]byte, error) {
+func (_m *MockExporter) Export(_a0 []budget.Transaction) ([]byte, error) {
 	ret := _m.Called(_a0)
 	if ret.Get(1) != nil {
 		return ret.Get(0).([]byte), ret.Get(1).(error)

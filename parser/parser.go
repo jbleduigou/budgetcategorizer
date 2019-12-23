@@ -11,7 +11,7 @@ import (
 )
 
 type Parser interface {
-	ParseTransactions(r io.Reader) ([]*budget.Transaction, error)
+	ParseTransactions(r io.Reader) ([]budget.Transaction, error)
 }
 
 type csvreader interface {
@@ -25,7 +25,7 @@ func NewParser() Parser {
 	return &csvParser{}
 }
 
-func (c *csvParser) ParseTransactions(r io.Reader) ([]*budget.Transaction, error) {
+func (c *csvParser) ParseTransactions(r io.Reader) ([]budget.Transaction, error) {
 	reader := csv.NewReader(r)
 	reader.LazyQuotes = true
 	reader.Comma = ';'
@@ -34,7 +34,7 @@ func (c *csvParser) ParseTransactions(r io.Reader) ([]*budget.Transaction, error
 	return c.parse(reader)
 }
 
-func (c *csvParser) parse(reader csvreader) (transactions []*budget.Transaction, err error) {
+func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, err error) {
 	rawCSVdata, err := reader.ReadAll()
 
 	if err != nil {

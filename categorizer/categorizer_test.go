@@ -15,7 +15,7 @@ func TestCategorizeFound(t *testing.T) {
 	c := NewCategorizer(l)
 
 	expected := "Courses Alimentation"
-	output := c.Categorize(*tr)
+	output := c.Categorize(tr)
 
 	fmt.Println(output)
 	assert.Equal(t, expected, string(output.Category))
@@ -27,7 +27,7 @@ func TestCategorizeNotFound(t *testing.T) {
 	c := NewCategorizer(l)
 
 	expected := "???"
-	output := c.Categorize(*tr)
+	output := c.Categorize(tr)
 
 	fmt.Println(output)
 	assert.Equal(t, expected, string(output.Category))

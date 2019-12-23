@@ -80,11 +80,10 @@ func (c *command) uploadResult(result []byte, fileName string, bucketName string
 	return nil
 }
 
-func mapTransactions(input []*budget.Transaction, f func(budget.Transaction) budget.Transaction) []*budget.Transaction {
-	output := make([]*budget.Transaction, len(input))
+func mapTransactions(input []budget.Transaction, f func(budget.Transaction) budget.Transaction) []budget.Transaction {
+	output := make([]budget.Transaction, len(input))
 	for i, v := range input {
-		var result = f(*v)
-		output[i] = &result
+		output[i] = f(v)
 	}
 	return output
 }

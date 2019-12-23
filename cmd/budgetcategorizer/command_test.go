@@ -76,7 +76,7 @@ func TestExecute(t *testing.T) {
 		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("input/CA20191220_1142.CSV")},
 		mock.Anything).Return(int64(1337), nil)
 	p := mock.NewParser()
-	p.On("ParseTransactions", mock.Anything).Return([]*budget.Transaction{}, nil)
+	p.On("ParseTransactions", mock.Anything).Return([]budget.Transaction{}, nil)
 	e := mock.NewExporter()
 	e.On("Export", mock.Anything, mock.Anything).Return([]byte(""), nil)
 	u := mock.NewUploader()

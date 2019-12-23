@@ -10,6 +10,6 @@ type Transaction struct {
 }
 
 // NewTransaction creates a transaction.
-func NewTransaction(date string, description string, comment string, category string, value float64) *Transaction {
-	return &Transaction{Date: date, Description: description, Comment: comment, Category: category, Value: value}
+func NewTransaction(date string, description string, comment string, category string, value float64) Transaction {
+	return Transaction{Date: date, Description: description, Comment: comment, Category: category, Value: value}
 }

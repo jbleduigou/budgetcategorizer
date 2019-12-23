@@ -10,7 +10,7 @@ import (
 )
 
 type Exporter interface {
-	Export(transactions []*budget.Transaction) ([]byte, error)
+	Export(transactions []budget.Transaction) ([]byte, error)
 }
 
 type csvwriter interface {
@@ -24,7 +24,7 @@ func NewExporter() Exporter {
 	return &csvExporter{}
 }
 
-func (e *csvExporter) Export(transactions []*budget.Transaction) ([]byte, error) {
+func (e *csvExporter) Export(transactions []budget.Transaction) ([]byte, error) {
 	var b bytes.Buffer
 	writer := csv.NewWriter(&b)
 
@@ -34,7 +34,7 @@ func (e *csvExporter) Export(transactions []*budget.Transaction) ([]byte, error)
 	return b.Bytes(), err
 }
 
-func (e *csvExporter) exportToCSV(transactions []*budget.Transaction, writer csvwriter) error {
+func (e *csvExporter) exportToCSV(transactions []budget.Transaction, writer csvwriter) error {
 	for _, value := range transactions {
 		tunasse := strconv.FormatFloat(value.Value, 'f', -1, 64)
 

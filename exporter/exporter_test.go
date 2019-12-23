@@ -9,7 +9,7 @@ import (
 )
 
 func TestExport(t *testing.T) {
-	transactions := []*budget.Transaction{}
+	transactions := []budget.Transaction{}
 	transactions = append(transactions, budget.NewTransaction("18/12/2019", "<libelle>", "<commentaire>", "<category>", 13.37))
 	transactions = append(transactions, budget.NewTransaction("18/12/2019", "<libelle>", "<commentaire>", "<category>", -19.84))
 
@@ -31,7 +31,7 @@ func (m *mockWriterWithError) Write(record []string) error {
 }
 
 func TestExportWithError(t *testing.T) {
-	transactions := []*budget.Transaction{}
+	transactions := []budget.Transaction{}
 	transactions = append(transactions, budget.NewTransaction("18/12/2019", "<libelle>", "<commentaire>", "<category>", 13.37))
 	transactions = append(transactions, budget.NewTransaction("18/12/2019", "<libelle>", "<commentaire>", "<category>", -19.84))
 
