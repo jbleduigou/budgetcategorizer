@@ -3,16 +3,13 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"regexp"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	budget "github.com/jbleduigou/budgetcategorizer"
 	"github.com/jbleduigou/budgetcategorizer/categorizer"
-	"github.com/jbleduigou/budgetcategorizer/exporter"
 	"github.com/jbleduigou/budgetcategorizer/messaging"
 	"github.com/jbleduigou/budgetcategorizer/parser"
 )
@@ -21,10 +18,8 @@ type command struct {
 	bucketName  string
 	objectKey   string
 	downloader  s3manageriface.DownloaderAPI
-	uploader    s3manageriface.UploaderAPI
 	parser      parser.Parser
 	categorizer categorizer.Categorizer
-	exporter    exporter.Exporter
 	broker      messaging.Broker
 }
 
@@ -37,7 +32,7 @@ func (c *command) execute() {
 	categorized := mapTransactions(transactions, c.categorizer.Categorize)
 	for _, t := range categorized {
 		c.broker.Send(t)
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	}
 }
 
@@ -54,30 +49,6 @@ func (c *command) downloadFile(objectKey string, bucketName string) ([]byte, err
 	}
 	fmt.Printf("File %v downloaded, read %d bytes\n", objectKey, n)
 	return buff.Bytes(), nil
-}
-
-func (c *command) getResultFileName(fileName string) string {
-	resultFileName := []byte(fileName)
-	re := regexp.MustCompile(`(\.CSV)`)
-	resultFileName = re.ReplaceAll(resultFileName, []byte("-result.txt"))
-	return string(resultFileName)
-}
-
-func (c *command) uploadResult(result []byte, fileName string, bucketName string) error {
-	r := bytes.NewReader(result)
-	objectKey := "output/" + fileName
-
-	upParams := &s3manager.UploadInput{
-		Bucket: &bucketName,
-		Key:    &objectKey,
-		Body:   r,
-	}
-	o, err := c.uploader.Upload(upParams)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Success uploading file to location %v \n", o.Location)
-	return nil
 }
 
 func mapTransactions(input []budget.Transaction, f func(budget.Transaction) budget.Transaction) []budget.Transaction {
