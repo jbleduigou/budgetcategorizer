@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -11,6 +12,7 @@ import (
 	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/jbleduigou/budgetcategorizer/config"
 	"github.com/jbleduigou/budgetcategorizer/exporter"
+	"github.com/jbleduigou/budgetcategorizer/messaging"
 	"github.com/jbleduigou/budgetcategorizer/parser"
 )
 
@@ -28,7 +30,7 @@ func handler(ctx context.Context, s3Event events.S3Event) {
 		s3event := record.S3
 		objectKey := strings.ReplaceAll(s3event.Object.Key, "input/", "")
 		// Instantiate a command
-		c := &command{s3event.Bucket.Name, objectKey, downloader, uploader, parser, categorizer, exporter}
+		c := &command{s3event.Bucket.Name, objectKey, downloader, uploader, parser, categorizer, exporter, messaging.NewBroker(os.Getenv("SQS_QUEUE_URL"))}
 		// Execute the command
 		c.execute()
 	}

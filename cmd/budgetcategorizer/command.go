@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -12,6 +13,7 @@ import (
 	budget "github.com/jbleduigou/budgetcategorizer"
 	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/jbleduigou/budgetcategorizer/exporter"
+	"github.com/jbleduigou/budgetcategorizer/messaging"
 	"github.com/jbleduigou/budgetcategorizer/parser"
 )
 
@@ -23,6 +25,7 @@ type command struct {
 	parser      parser.Parser
 	categorizer categorizer.Categorizer
 	exporter    exporter.Exporter
+	broker      messaging.Broker
 }
 
 func (c *command) execute() {
@@ -32,13 +35,10 @@ func (c *command) execute() {
 	transactions, _ := c.parser.ParseTransactions(bytes.NewReader(content))
 	//categorize transactions
 	categorized := mapTransactions(transactions, c.categorizer.Categorize)
-	//write transactions to temp folder
-	resultFileName := c.getResultFileName(c.objectKey)
-	//export transactions to proper csv format
-	output, _ := c.exporter.Export(categorized)
-	fmt.Printf("Output has size %v \n", len(output))
-	//	upload to s3
-	c.uploadResult(output, resultFileName, c.bucketName)
+	for _, t := range categorized {
+		c.broker.Send(t)
+		time.Sleep(50 * time.Millisecond)
+	}
 }
 
 func (c *command) downloadFile(objectKey string, bucketName string) ([]byte, error) {
