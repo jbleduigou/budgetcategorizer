@@ -47,13 +47,17 @@ func TestExecute(t *testing.T) {
 		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("input/CA20191220_1142.CSV")},
 		mock.Anything).Return(int64(1337), nil)
 	p := mock.NewParser()
-	p.On("ParseTransactions", mock.Anything).Return([]budget.Transaction{}, nil)
+	p.On("ParseTransactions", mock.Anything).Return([]budget.Transaction{budget.NewTransaction("19/12/2019", "Paiement Par Carte Express Proxi Saint Thonan 17/12", "", "", 13.37)}, nil)
 	keywords := make(map[string]string)
+	keywords["Express Proxi Saint Thonan"] = "Courses Alimentation"
 	cat := categorizer.NewCategorizer(keywords)
-	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "CA20191220_1142.CSV", categorizer: cat}
+	b := mock.NewBroker()
+	b.On("Send", budget.NewTransaction("19/12/2019", "Paiement Par Carte Express Proxi Saint Thonan 17/12", "", "Courses Alimentation", 13.37)).Return(nil)
+	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "CA20191220_1142.CSV", categorizer: cat, broker: b}
 
 	c.execute()
 
 	d.AssertExpectations(t)
 	p.AssertExpectations(t)
+	b.AssertExpectations(t)
 }
