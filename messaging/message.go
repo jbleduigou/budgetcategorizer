@@ -10,10 +10,12 @@ import (
 	budget "github.com/jbleduigou/budgetcategorizer"
 )
 
+// Broker provides an interface for sending messaging to a queue
 type Broker interface {
 	Send(t budget.Transaction) error
 }
 
+// NewBroker will provide an instance of a Broker, implementation is not exposed
 func NewBroker(queue string, svc sqsiface.SQSAPI) Broker {
 	return &sqsbroker{queueURL: queue, svc: svc}
 }

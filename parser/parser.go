@@ -10,8 +10,14 @@ import (
 	budget "github.com/jbleduigou/budgetcategorizer"
 )
 
+// Parser provides an interface for parsing raw csv transactions
 type Parser interface {
 	ParseTransactions(r io.Reader) ([]budget.Transaction, error)
+}
+
+// NewParser will provide an instance of a Parser, implementation is not exposed
+func NewParser() Parser {
+	return &csvParser{}
 }
 
 type csvreader interface {
@@ -19,10 +25,6 @@ type csvreader interface {
 }
 
 type csvParser struct {
-}
-
-func NewParser() Parser {
-	return &csvParser{}
 }
 
 func (c *csvParser) ParseTransactions(r io.Reader) ([]budget.Transaction, error) {

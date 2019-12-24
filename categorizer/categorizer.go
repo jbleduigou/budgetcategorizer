@@ -7,10 +7,12 @@ import (
 	budget "github.com/jbleduigou/budgetcategorizer"
 )
 
+// Categorizer provides and interface for assigning a category to a transaction
 type Categorizer interface {
 	Categorize(t budget.Transaction) budget.Transaction
 }
 
+// NewCategorizer will provide an instance of a Categorizer, implementation is not exposed
 func NewCategorizer(libelles map[string]string) Categorizer {
 	return &categorizerImpl{libelles: libelles}
 }

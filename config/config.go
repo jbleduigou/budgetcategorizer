@@ -17,11 +17,15 @@ keywords:
   Express Proxi Saint Thonan: Courses Alimentation
 `
 
+// Configuration provides and interface for the configuration of the software
 type Configuration struct {
 	Categories []string
 	Keywords   map[string]string
 }
 
+// GetConfiguration will return the configuration.
+// Configuration can be downloaded from an S3 bucket.
+// If not available a default configuration will be returned
 func GetConfiguration(downloader s3manageriface.DownloaderAPI) Configuration {
 	bucket, ok := os.LookupEnv("CONFIGURATION_FILE_BUCKET")
 	if ok {

@@ -13,7 +13,7 @@ import (
 
 func TestSendSuccess(t *testing.T) {
 	m := mock.NewSQSClient()
-	messageId := "67043d7c-49db-43bb-af88-d0c30d62234f"
+	messageID := "67043d7c-49db-43bb-af88-d0c30d62234f"
 	request := &sqs.SendMessageInput{
 		DelaySeconds: aws.Int64(10),
 		MessageAttributes: map[string]*sqs.MessageAttributeValue{
@@ -38,7 +38,7 @@ func TestSendSuccess(t *testing.T) {
 		QueueUrl:    aws.String("https://sqs.eu-west-3.amazonaws.com/959789434/testing"),
 	}
 
-	m.On("SendMessage", request).Return(&sqs.SendMessageOutput{MessageId: &messageId}, nil)
+	m.On("SendMessage", request).Return(&sqs.SendMessageOutput{MessageId: &messageID}, nil)
 
 	b := NewBroker("https://sqs.eu-west-3.amazonaws.com/959789434/testing", m)
 
