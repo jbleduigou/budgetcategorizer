@@ -51,10 +51,10 @@ func (b *sqsbroker) Send(t budget.Transaction) error {
 	})
 
 	if err != nil {
-		fmt.Println("Error", err)
+		fmt.Println("Error while sending message", err)
 		return err
 	}
 
-	fmt.Println("Success", *result.MessageId)
+	fmt.Printf("Message send successfully with id '%v'\n", *result.MessageId)
 	return nil
 }
