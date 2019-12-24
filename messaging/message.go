@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
 	budget "github.com/jbleduigou/budgetcategorizer"
 )
 
@@ -14,24 +14,19 @@ type Broker interface {
 	Send(t budget.Transaction) error
 }
 
-func NewBroker(queue string) Broker {
-	return &sqsbroker{queue: queue}
+func NewBroker(queue string, svc sqsiface.SQSAPI) Broker {
+	return &sqsbroker{queueURL: queue, svc: svc}
 }
 
 type sqsbroker struct {
-	queue string
+	queueURL string
+	svc      sqsiface.SQSAPI
 }
 
 func (b *sqsbroker) Send(t budget.Transaction) error {
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-
-	svc := sqs.New(sess)
-
 	amount := strconv.FormatFloat(t.Value, 'f', -1, 64)
 
-	result, err := svc.SendMessage(&sqs.SendMessageInput{
+	result, err := b.svc.SendMessage(&sqs.SendMessageInput{
 		DelaySeconds: aws.Int64(10),
 		MessageAttributes: map[string]*sqs.MessageAttributeValue{
 			"Date": &sqs.MessageAttributeValue{
@@ -42,10 +37,6 @@ func (b *sqsbroker) Send(t budget.Transaction) error {
 				DataType:    aws.String("String"),
 				StringValue: aws.String(t.Description),
 			},
-			// "Comment": &sqs.MessageAttributeValue{
-			// 	DataType:    aws.String("String"),
-			// 	StringValue: aws.String(t.Comment),
-			// },
 			"Category": &sqs.MessageAttributeValue{
 				DataType:    aws.String("String"),
 				StringValue: aws.String(t.Category),
@@ -56,7 +47,7 @@ func (b *sqsbroker) Send(t budget.Transaction) error {
 			},
 		},
 		MessageBody: aws.String(t.Description),
-		QueueUrl:    &b.queue,
+		QueueUrl:    &b.queueURL,
 	})
 
 	if err != nil {

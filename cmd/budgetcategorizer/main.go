@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/jbleduigou/budgetcategorizer/config"
 	"github.com/jbleduigou/budgetcategorizer/messaging"
@@ -22,12 +23,13 @@ func handler(ctx context.Context, s3Event events.S3Event) {
 	parser := parser.NewParser()
 	config := config.GetConfiguration(downloader)
 	categorizer := categorizer.NewCategorizer(config.Keywords)
+	sqs := sqs.New(sess)
 	for _, record := range s3Event.Records {
 		// Retrieve data from S3 event
 		s3event := record.S3
 		objectKey := strings.ReplaceAll(s3event.Object.Key, "input/", "")
 		// Instantiate a command
-		c := &command{s3event.Bucket.Name, objectKey, downloader, parser, categorizer, messaging.NewBroker(os.Getenv("SQS_QUEUE_URL"))}
+		c := &command{s3event.Bucket.Name, objectKey, downloader, parser, categorizer, messaging.NewBroker(os.Getenv("SQS_QUEUE_URL"), sqs)}
 		// Execute the command
 		c.execute()
 	}
