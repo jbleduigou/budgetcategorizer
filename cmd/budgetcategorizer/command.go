@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -32,7 +31,6 @@ func (c *command) execute() {
 	categorized := mapTransactions(transactions, c.categorizer.Categorize)
 	for _, t := range categorized {
 		c.broker.Send(t)
-		time.Sleep(500 * time.Millisecond)
 	}
 }
 
