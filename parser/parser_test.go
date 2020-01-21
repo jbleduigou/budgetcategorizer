@@ -20,7 +20,7 @@ func TestParseTransactions(t *testing.T) {
 	assert.Equal(t, debit.Value, 3.18)
 	credit := transactions[1]
 	assert.Equal(t, credit.Date, "18/12/2019")
-	assert.Equal(t, credit.Description, "3446335 Remise De Cheque ")
+	assert.Equal(t, credit.Description, "3446335 Remise De Cheque Ref: 3446335 ")
 	assert.Equal(t, credit.Comment, "")
 	assert.Equal(t, credit.Category, "")
 	assert.Equal(t, credit.Value, -30.13)
@@ -62,8 +62,8 @@ acting alone could ever
 hope to bring about.
 ";not-a-number;
 18/12/2019;"3446335 
-Remise De Cheque 
-";;30,13;
+Remise De Cheque Ref: �3446335
+¤£¥€¡¶€";;30,13;
 18/12/2019;"3446535 
 Remise De Cheque 
 ";;not-a-number;

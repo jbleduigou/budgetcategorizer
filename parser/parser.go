@@ -83,6 +83,10 @@ func (c *csvParser) sanitizeDescription(d string) string {
 		re := regexp.MustCompile(`[\s]+`)
 		libelle = re.ReplaceAll(libelle, []byte(" "))
 	}
+	{
+		re := regexp.MustCompile(`[^\x20-\x7F]`)
+		libelle = re.ReplaceAll(libelle, []byte(""))
+	}
 	return string(libelle)
 }
 
