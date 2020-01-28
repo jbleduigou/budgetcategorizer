@@ -43,6 +43,12 @@ It would be nice to have a cloudformation template at some point.
 * create cloud formation template
 * fix weird behaviour for GitHub Actions upload artifact : https://github.com/actions/upload-artifact/issues/39 ?
 
+## Authors
+
+* **Jean-Baptiste Le Duigou** - *Initial work* - [jbleduigou](https://github.com/jbleduigou)
+
+See also the list of [contributors](https://github.com/jbleduigou/budgetcategorizer/contributors) who participated in this project.
+
 ## License
 Licensed under the Apache License, Version 2.0.
 Copyright 2019 Jean-Baptiste Le Duigou
