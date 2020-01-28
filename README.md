@@ -54,5 +54,6 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 See also the list of [contributors](https://github.com/jbleduigou/budgetcategorizer/contributors) who participated in this project.
 
 ## License
-Licensed under the Apache License, Version 2.0.
+Licensed under the Apache License, Version 2.0.  
+See [LICENSE.txt](LICENSE.txt) for more details.  
 Copyright 2019 Jean-Baptiste Le Duigou
