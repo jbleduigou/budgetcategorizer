@@ -2,7 +2,7 @@
 
 I created this project for automating some tasks I was doing manually when taking care of my personal finances.  
 Long story short, this is an ETL for tracking my expenses.  
-The project consists of two lambda functions : [budgetcategorizer](https://github.com/jbleduigou/budgetcategorizer) and [budget2sheets](https://github.com/jbleduigou/budget2sheets)
+The project consists of two lambda functions : [budgetcategorizer](https://github.com/jbleduigou/budgetcategorizer) and [budget2sheets](https://github.com/jbleduigou/budget2sheets)  
 The transform part is performed by **budgetcategorizer** and has two main responsibilities : sanitize the expense description and assign a category to the expense.  
 The load part is performed by **budget2sheets** which is going to upload the transcations (i.e. expenses) to Google Sheets.
 
