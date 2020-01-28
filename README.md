@@ -23,7 +23,7 @@ You will need to have Go installed on your machine.
 Currently the project uses version 1.13
 
 ### Building
-You will find a Makefile at the root of the project.
+You will find a Makefile at the root of the project.  
 To run the full build and have zip file ready for AWS Lambda use:
 ```
 make zip
