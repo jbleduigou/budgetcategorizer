@@ -56,4 +56,4 @@ See also the list of [contributors](https://github.com/jbleduigou/budgetcategori
 ## License
 Licensed under the Apache License, Version 2.0.  
 See [LICENSE.txt](LICENSE.txt) for more details.  
-Copyright 2019 Jean-Baptiste Le Duigou
+Copyright 2020 Jean-Baptiste Le Duigou
