@@ -32,11 +32,15 @@ If you only want to run the unit tests:
 ```
 make test
 ```
+## Deployment
+For now deployment is made manually.  
+It would be nice to have a cloudformation template at some point.
 
 ## Improvements / Remaining Work
 
 * extract logic to dedicated classes and write unit tests
 * improve error handling
+* create cloud formation template
 * fix weird behaviour for GitHub Actions upload artifact : https://github.com/actions/upload-artifact/issues/39 ?
 
 ## License
