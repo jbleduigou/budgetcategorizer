@@ -3,6 +3,8 @@
 This is a sample AWS Lambda function for transforming transactions for budgeting.
 I was sick of having to do it manually :)
 
+## Overall Architecture
+![Architecture Diagram](architecture_diagram.png)
 
 ## improvements
 
