@@ -51,6 +51,7 @@ Please read the page on [12 Factor Configuration](https://12factor.net/config) f
 
 ### Environment Variables
 The following environment variables should be declared within you lambda:
+
 | Name                         | Description   | Sample Value  |
 | ---------------------------- |:-------------:| :-----:|
 | SQS_QUEUE_URL                | URL of the SQS queue where transactions are being pushed | https://sqs.eu-west-3.amazonaws.com/6698939/transactions |
