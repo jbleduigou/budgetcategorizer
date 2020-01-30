@@ -103,7 +103,7 @@ Interfaces were introduced to avoid tight coupling and therefore facilitate unit
 
 The main data model is located at root of project in the file transaction.go  
 
-```JSONasPerl
+```yaml
 {
   "Date": "18/12/2019", // Date of transaction
   "Description": "Mmmh un donut!", // Descrition from bank statement
