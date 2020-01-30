@@ -6,16 +6,20 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func NewSQSClient() *MockSQS {
-	return &MockSQS{}
+// NewSQSClient provides a mock instance of a SQS client
+func NewSQSClient() *SQS {
+	return &SQS{}
 }
 
-type MockSQS struct {
+// SQS is an implementation of the SQSAPI interface with a mock, use for testing not for production
+type SQS struct {
 	sqsiface.SQSAPI
 	mock.Mock
 }
 
-func (_m *MockSQS) SendMessage(_a0 *sqs.SendMessageInput) (*sqs.SendMessageOutput, error) {
+// SendMessage API operation for Amazon Simple Queue Service.
+// Delivers a message to the specified queue.
+func (_m *SQS) SendMessage(_a0 *sqs.SendMessageInput) (*sqs.SendMessageOutput, error) {
 	ret := _m.Called(_a0)
 	if ret.Get(0) == nil && ret.Get(1) == nil {
 		return nil, nil

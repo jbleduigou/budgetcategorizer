@@ -7,15 +7,18 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func NewParser() *MockParser {
-	return &MockParser{}
+// NewParser provides a mock instance of a Parser
+func NewParser() *Parser {
+	return &Parser{}
 }
 
-type MockParser struct {
+// Parser is an implementation of the Parser interface with a mock, use for testing not for production
+type Parser struct {
 	mock.Mock
 }
 
-func (_m *MockParser) ParseTransactions(_a0 io.Reader) ([]budget.Transaction, error) {
+// ParseTransactions parses an array of Transaction from a reader
+func (_m *Parser) ParseTransactions(_a0 io.Reader) ([]budget.Transaction, error) {
 	ret := _m.Called(_a0)
 	if ret.Get(1) != nil {
 		return ret.Get(0).([]budget.Transaction), ret.Get(1).(error)
