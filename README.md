@@ -106,10 +106,10 @@ The main data model is located at root of project in the file transaction.go
 ```yaml
 {
   "Date": "18/12/2019", // Date of transaction
-  "Description": "Mmmh un donut!", // Descrition from bank statement
+  "Description": "Mmmh un donut!", // Description from bank statement
   "Comment": "", // Not used for now
   "Category": "Courses Alimentation", // The category assigned by budgetcategorizer
-  "Value": 3.18 // Transaction amount,  can be negative in case of refund for instance
+  "Value": 3.18 // Transaction amount, can be negative in case of refund for instance
 }
 ```
 
