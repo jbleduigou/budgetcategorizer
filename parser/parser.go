@@ -89,13 +89,12 @@ func (c *csvParser) sanitizeDescription(d string) string {
 		libelle = re.ReplaceAll(libelle, []byte(""))
 	}
 	if strings.Contains(d, "Cheque Emis") {
-		return c.sanitizeCheque(string(libelle))
+		return c.sanitizeCheque(libelle)
 	}
 	return string(libelle)
 }
 
-func (c *csvParser) sanitizeCheque(d string) string {
-	libelle := []byte(d)
+func (c *csvParser) sanitizeCheque(libelle []byte) string {
 	{
 		re := regexp.MustCompile(`[\/][0]+`)
 		libelle = re.ReplaceAll(libelle, []byte(""))
