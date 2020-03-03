@@ -112,10 +112,6 @@ func (c *csvParser) parseAmount(a string) (float64, error) {
 		re := regexp.MustCompile(`,`)
 		creditStr = re.ReplaceAll(creditStr, []byte("."))
 	}
-	{
-		re := regexp.MustCompile(`,`)
-		creditStr = re.ReplaceAll(creditStr, []byte("."))
-	}
 	credit, err := strconv.ParseFloat(string(creditStr), 64)
 	return credit, err
 }
