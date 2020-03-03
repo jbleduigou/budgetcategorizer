@@ -11,7 +11,7 @@ import (
 func TestParseTransactions(t *testing.T) {
 	p := NewParser()
 	transactions, _ := p.ParseTransactions(bytes.NewBufferString(content))
-	assert.Equal(t, 2, len(transactions))
+	assert.Equal(t, 4, len(transactions))
 	debit := transactions[0]
 	assert.Equal(t, debit.Date, "18/12/2019")
 	assert.Equal(t, debit.Description, "Dans la vie on ne fait pas ce que l'on veut mais on est responsable de ce que l'on est. ")
@@ -24,6 +24,18 @@ func TestParseTransactions(t *testing.T) {
 	assert.Equal(t, credit.Comment, "")
 	assert.Equal(t, credit.Category, "")
 	assert.Equal(t, credit.Value, -30.13)
+	cheque1 := transactions[2]
+	assert.Equal(t, cheque1.Date, "28/02/2020")
+	assert.Equal(t, cheque1.Description, "Cheque Emis 8936392")
+	assert.Equal(t, cheque1.Comment, "")
+	assert.Equal(t, cheque1.Category, "Courses Alimentation")
+	assert.Equal(t, cheque1.Value, 118.8)
+	cheque2 := transactions[3]
+	assert.Equal(t, cheque2.Date, "29/02/2020")
+	assert.Equal(t, cheque2.Description, "Cheque Emis 5423696")
+	assert.Equal(t, cheque2.Comment, "")
+	assert.Equal(t, cheque2.Category, "Courses Alimentation")
+	assert.Equal(t, cheque2.Value, 39.0)
 }
 
 type mockReaderWithError struct {
@@ -67,6 +79,12 @@ Remise De Cheque Ref: �3446335
 18/12/2019;"3446535 
 Remise De Cheque 
 ";;not-a-number;
+28/02/2020;"8936392 
+Cheque Emis 
+";118,80;
+29/02/2020;"5423696/0000000/000000000 
+Cheque Emis 
+";39,00;
 
   
 Mr Jb Le Duigou     

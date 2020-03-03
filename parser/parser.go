@@ -6,6 +6,7 @@ import (
 	"io"
 	"regexp"
 	"strconv"
+	"strings"
 
 	budget "github.com/jbleduigou/budgetcategorizer"
 )
@@ -87,11 +88,31 @@ func (c *csvParser) sanitizeDescription(d string) string {
 		re := regexp.MustCompile(`[^\x20-\x7F]`)
 		libelle = re.ReplaceAll(libelle, []byte(""))
 	}
+	if strings.Contains(d, "Cheque Emis") {
+		return c.sanitizeCheque(string(libelle))
+	}
+	return string(libelle)
+}
+
+func (c *csvParser) sanitizeCheque(d string) string {
+	libelle := []byte(d)
+	{
+		re := regexp.MustCompile(`[\/][0]+`)
+		libelle = re.ReplaceAll(libelle, []byte(""))
+	}
+	{
+		re := regexp.MustCompile(`([\d]{7,7})( )(Cheque Emis)( )`)
+		libelle = re.ReplaceAll(libelle, []byte("$3 $1"))
+	}
 	return string(libelle)
 }
 
 func (c *csvParser) parseAmount(a string) (float64, error) {
 	creditStr := []byte(a)
+	{
+		re := regexp.MustCompile(`,`)
+		creditStr = re.ReplaceAll(creditStr, []byte("."))
+	}
 	{
 		re := regexp.MustCompile(`,`)
 		creditStr = re.ReplaceAll(creditStr, []byte("."))
