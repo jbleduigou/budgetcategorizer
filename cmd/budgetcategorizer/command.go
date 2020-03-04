@@ -39,7 +39,7 @@ func (c *command) downloadFile(objectKey string, bucketName string) ([]byte, err
 	buff := &aws.WriteAtBuffer{}
 	n, err := c.downloader.Download(buff, &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
-		Key:    aws.String("input/" + objectKey),
+		Key:    aws.String(objectKey),
 	})
 	if err != nil {
 		fmt.Printf("Failed to download file %v\n, %v", objectKey, err)

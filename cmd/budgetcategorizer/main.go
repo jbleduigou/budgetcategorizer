@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"os"
-	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -27,9 +26,8 @@ func handler(ctx context.Context, s3Event events.S3Event) {
 	for _, record := range s3Event.Records {
 		// Retrieve data from S3 event
 		s3event := record.S3
-		objectKey := strings.ReplaceAll(s3event.Object.Key, "input/", "")
 		// Instantiate a command
-		c := &command{s3event.Bucket.Name, objectKey, downloader, parser, categorizer, messaging.NewBroker(os.Getenv("SQS_QUEUE_URL"), sqs)}
+		c := &command{s3event.Bucket.Name, s3event.Object.Key, downloader, parser, categorizer, messaging.NewBroker(os.Getenv("SQS_QUEUE_URL"), sqs)}
 		// Execute the command
 		c.execute()
 	}
