@@ -45,21 +45,18 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 	}
 
 	for _, each := range rawCSVdata {
-		if len(each) == 4 {
-			date := each[0]
-			libelle := c.sanitizeDescription(each[1])
-			debit, err := c.parseAmount(each[2])
-			if err == nil {
-				t := budget.NewTransaction(date, libelle, "", "Courses Alimentation", debit)
-				transactions = append(transactions, t)
-			} else {
-				fmt.Printf("%v\n", err)
-			}
-		}
 		if len(each) == 5 {
 			date := each[0]
-			if "Date" != date {
-				libelle := c.sanitizeDescription(each[1])
+			libelle := c.sanitizeDescription(each[1])
+			if c.isDebitTransaction(each) {
+				debit, err := c.parseAmount(each[2])
+				if err == nil {
+					t := budget.NewTransaction(date, libelle, "", "Courses Alimentation", debit)
+					transactions = append(transactions, t)
+				} else {
+					fmt.Printf("%v\n", err)
+				}
+			} else {
 				credit, err := c.parseAmount(each[3])
 				if err == nil {
 					t := budget.NewTransaction(date, libelle, "", "", -credit)
@@ -74,8 +71,16 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 	return transactions, nil
 }
 
+func (c *csvParser) isDebitTransaction(d []string) bool {
+	if d[2] == "" && d[3] != "" {
+		return false
+	}
+	return true
+}
+
 func (c *csvParser) sanitizeDescription(d string) string {
-	libelle := []byte(d)
+	capitalized := strings.Title(strings.ToLower(d))
+	libelle := []byte(capitalized)
 	{
 		re := regexp.MustCompile(`\n`)
 		libelle = re.ReplaceAll(libelle, []byte(" "))
@@ -88,7 +93,7 @@ func (c *csvParser) sanitizeDescription(d string) string {
 		re := regexp.MustCompile(`[^\x20-\x7F]`)
 		libelle = re.ReplaceAll(libelle, []byte(""))
 	}
-	if strings.Contains(d, "Cheque Emis") {
+	if strings.Contains(capitalized, "Cheque Emis") {
 		return c.sanitizeCheque(libelle)
 	}
 	return string(libelle)

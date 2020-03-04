@@ -14,7 +14,7 @@ func TestParseTransactions(t *testing.T) {
 	assert.Equal(t, 4, len(transactions))
 	debit := transactions[0]
 	assert.Equal(t, debit.Date, "18/12/2019")
-	assert.Equal(t, debit.Description, "Dans la vie on ne fait pas ce que l'on veut mais on est responsable de ce que l'on est. ")
+	assert.Equal(t, debit.Description, "Paiement Par Carte Brulerie Des Capuci Brest 15/02 ")
 	assert.Equal(t, debit.Comment, "")
 	assert.Equal(t, debit.Category, "Courses Alimentation")
 	assert.Equal(t, debit.Value, 3.18)
@@ -63,28 +63,29 @@ Solde au 18/12/19 : 13,37 EUR
 Liste des opérations du compte entre le 18/12/2019 et le 18/12/2019;
 
 Date;Libellé;Débit Euros;Crédit Euros;
-18/12/2019;"Dans la vie on ne fait pas 
-ce que l'on veut 
-mais on est responsable 
-de ce que l'on est.
-";3,18;
-18/12/2019;"People acting together as a group 
-can accomplish things which no individual 
-acting alone could ever 
-hope to bring about.
-";not-a-number;
+18/12/2019;"PAIEMENT PAR CARTE      
+BRULERIE DES CAPUCI BREST  15/02  
+
+
+
+";3,18;;
+18/12/2019;"PEOPLE ACTING TOGETHER AS A GROUP 
+CAN ACCOMPLISH THINGS WHICH NO INDIVIDUAL 
+ACTING ALONE COULD EVER 
+HOPE TO BRING ABOUT.
+";not-a-number;;
 18/12/2019;"3446335 
-Remise De Cheque Ref: �3446335
+REMISE DE CHEQUE REF: �3446335
 ¤£¥€¡¶€";;30,13;
 18/12/2019;"3446535 
-Remise De Cheque 
+REMISE DE CHEQUE 
 ";;not-a-number;
 28/02/2020;"8936392 
-Cheque Emis 
-";118,80;
+CHEQUE EMIS 
+";118,80;;
 29/02/2020;"5423696/0000000/000000000 
-Cheque Emis 
-";39,00;
+CHEQUE EMIS 
+";39,00;;
 
   
 Mr Jb Le Duigou     
