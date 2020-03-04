@@ -20,7 +20,7 @@ func TestDownloadFile(t *testing.T) {
 		mock.Anything).Return(int64(1337), nil)
 	c := &command{downloader: m}
 
-	content, err := c.downloadFile("CA20191220_1142.CSV", "mybucket")
+	content, err := c.downloadFile("input/CA20191220_1142.CSV", "mybucket")
 	assert.Equal(t, []byte("test"), content)
 	assert.Nil(t, err)
 	m.AssertExpectations(t)
@@ -34,7 +34,7 @@ func TestDownloadFileWithError(t *testing.T) {
 		mock.Anything).Return(int64(0), fmt.Errorf("error for unit test"))
 	c := &command{downloader: m}
 
-	content, err := c.downloadFile("CA20191220_1142.CSV", "mybucket")
+	content, err := c.downloadFile("input/CA20191220_1142.CSV", "mybucket")
 	assert.Equal(t, []byte(nil), content)
 	assert.Equal(t, "error for unit test", err.Error())
 	m.AssertExpectations(t)
@@ -53,7 +53,7 @@ func TestExecute(t *testing.T) {
 	cat := categorizer.NewCategorizer(keywords)
 	b := mock.NewBroker()
 	b.On("Send", budget.NewTransaction("19/12/2019", "Paiement Par Carte Express Proxi Saint Thonan 17/12", "", "Courses Alimentation", 13.37)).Return(nil)
-	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "CA20191220_1142.CSV", categorizer: cat, broker: b}
+	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "input/CA20191220_1142.CSV", categorizer: cat, broker: b}
 
 	c.execute()
 
