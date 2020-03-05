@@ -1,5 +1,6 @@
 # Budget Categorizer
 ![Go](https://github.com/jbleduigou/budgetcategorizer/workflows/Go/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jbleduigou/budgetcategorizer)](https://goreportcard.com/report/github.com/jbleduigou/budgetcategorizer)
 
 I created this project for automating some tasks I was doing manually when taking care of my personal finances.  
 Long story short, this is an ETL for tracking my expenses.  
