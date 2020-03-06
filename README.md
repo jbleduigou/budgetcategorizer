@@ -10,7 +10,7 @@ The load part is performed by **budget2sheets** which is going to upload the tra
 
 ## Overall Architecture
 
-![Architecture Diagram](architecture_diagram.png)
+![Architecture Diagram](docs/architecture_diagram.png)
 
 ## Getting Started
 
