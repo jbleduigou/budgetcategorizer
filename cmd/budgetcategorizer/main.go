@@ -15,7 +15,7 @@ import (
 	"github.com/jbleduigou/budgetcategorizer/parser"
 )
 
-func handler(ctx context.Context, s3Event events.S3Event) {
+func handleS3Event(ctx context.Context, s3Event events.S3Event) {
 	// Create all collaborators for command
 	sess := session.Must(session.NewSession())
 	downloader := s3manager.NewDownloader(sess)
@@ -35,5 +35,5 @@ func handler(ctx context.Context, s3Event events.S3Event) {
 
 func main() {
 	// Make the handler available for Remote Procedure Call by AWS Lambda
-	lambda.Start(handler)
+	lambda.Start(handleS3Event)
 }

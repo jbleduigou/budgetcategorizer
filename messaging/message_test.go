@@ -17,19 +17,19 @@ func TestSendSuccess(t *testing.T) {
 	request := &sqs.SendMessageInput{
 		DelaySeconds: aws.Int64(10),
 		MessageAttributes: map[string]*sqs.MessageAttributeValue{
-			"Date": &sqs.MessageAttributeValue{
+			"Date": {
 				DataType:    aws.String("String"),
 				StringValue: aws.String("<date>"),
 			},
-			"Description": &sqs.MessageAttributeValue{
+			"Description": {
 				DataType:    aws.String("String"),
 				StringValue: aws.String("<description>"),
 			},
-			"Category": &sqs.MessageAttributeValue{
+			"Category": {
 				DataType:    aws.String("String"),
 				StringValue: aws.String("<category>"),
 			},
-			"Value": &sqs.MessageAttributeValue{
+			"Value": {
 				DataType:    aws.String("Number"),
 				StringValue: aws.String("13.37"),
 			},
@@ -53,19 +53,19 @@ func TestSendError(t *testing.T) {
 	request := &sqs.SendMessageInput{
 		DelaySeconds: aws.Int64(10),
 		MessageAttributes: map[string]*sqs.MessageAttributeValue{
-			"Date": &sqs.MessageAttributeValue{
+			"Date": {
 				DataType:    aws.String("String"),
 				StringValue: aws.String("<date>"),
 			},
-			"Description": &sqs.MessageAttributeValue{
+			"Description": {
 				DataType:    aws.String("String"),
 				StringValue: aws.String("<description>"),
 			},
-			"Category": &sqs.MessageAttributeValue{
+			"Category": {
 				DataType:    aws.String("String"),
 				StringValue: aws.String("<category>"),
 			},
-			"Value": &sqs.MessageAttributeValue{
+			"Value": {
 				DataType:    aws.String("Number"),
 				StringValue: aws.String("13.37"),
 			},

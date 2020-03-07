@@ -31,19 +31,19 @@ func (b *sqsbroker) Send(t budget.Transaction) error {
 	result, err := b.svc.SendMessage(&sqs.SendMessageInput{
 		DelaySeconds: aws.Int64(10),
 		MessageAttributes: map[string]*sqs.MessageAttributeValue{
-			"Date": &sqs.MessageAttributeValue{
+			"Date": {
 				DataType:    aws.String("String"),
 				StringValue: aws.String(t.Date),
 			},
-			"Description": &sqs.MessageAttributeValue{
+			"Description": {
 				DataType:    aws.String("String"),
 				StringValue: aws.String(t.Description),
 			},
-			"Category": &sqs.MessageAttributeValue{
+			"Category": {
 				DataType:    aws.String("String"),
 				StringValue: aws.String(t.Category),
 			},
-			"Value": &sqs.MessageAttributeValue{
+			"Value": {
 				DataType:    aws.String("Number"),
 				StringValue: aws.String(amount),
 			},
