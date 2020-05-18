@@ -1,6 +1,7 @@
 package messaging
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -28,6 +29,11 @@ type sqsbroker struct {
 func (b *sqsbroker) Send(t budget.Transaction) error {
 	amount := strconv.FormatFloat(t.Value, 'f', -1, 64)
 
+	payload, _ := json.Marshal(t)
+	//Decided to ignore error, it is only returned is case of:
+	// - UnsupportedTypeError: Channel, complex, and function values
+	// - UnsupportedValueError: cyclic data structures
+
 	result, err := b.svc.SendMessage(&sqs.SendMessageInput{
 		DelaySeconds: aws.Int64(10),
 		MessageAttributes: map[string]*sqs.MessageAttributeValue{
@@ -48,7 +54,7 @@ func (b *sqsbroker) Send(t budget.Transaction) error {
 				StringValue: aws.String(amount),
 			},
 		},
-		MessageBody: aws.String(t.Description),
+		MessageBody: aws.String(string(payload)),
 		QueueUrl:    &b.queueURL,
 	})
 

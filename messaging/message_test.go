@@ -34,7 +34,7 @@ func TestSendSuccess(t *testing.T) {
 				StringValue: aws.String("13.37"),
 			},
 		},
-		MessageBody: aws.String("<description>"),
+		MessageBody: aws.String("{\"Date\":\"\\u003cdate\\u003e\",\"Description\":\"\\u003cdescription\\u003e\",\"Comment\":\"\\u003ccomment\\u003e\",\"Category\":\"\\u003ccategory\\u003e\",\"Value\":13.37}"),
 		QueueUrl:    aws.String("https://sqs.eu-west-3.amazonaws.com/959789434/testing"),
 	}
 
@@ -70,7 +70,7 @@ func TestSendError(t *testing.T) {
 				StringValue: aws.String("13.37"),
 			},
 		},
-		MessageBody: aws.String("<description>"),
+		MessageBody: aws.String("{\"Date\":\"\\u003cdate\\u003e\",\"Description\":\"\\u003cdescription\\u003e\",\"Comment\":\"\\u003ccomment\\u003e\",\"Category\":\"\\u003ccategory\\u003e\",\"Value\":13.37}"),
 		QueueUrl:    aws.String("https://sqs.eu-west-3.amazonaws.com/959789434/testing"),
 	}
 
