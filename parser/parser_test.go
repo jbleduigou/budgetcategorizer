@@ -11,7 +11,7 @@ import (
 func TestParseTransactions(t *testing.T) {
 	p := NewParser()
 	transactions, _ := p.ParseTransactions(bytes.NewBufferString(content))
-	assert.Equal(t, 4, len(transactions))
+	assert.Equal(t, 5, len(transactions))
 	debit := transactions[0]
 	assert.Equal(t, debit.Date, "18/12/2019")
 	assert.Equal(t, debit.Description, "Paiement Par Carte Brulerie Des Capuci Brest 15/02 ")
@@ -36,6 +36,12 @@ func TestParseTransactions(t *testing.T) {
 	assert.Equal(t, cheque2.Comment, "")
 	assert.Equal(t, cheque2.Category, "Courses Alimentation")
 	assert.Equal(t, cheque2.Value, 39.0)
+	grand := transactions[4]
+	assert.Equal(t, grand.Date, "01/01/2020")
+	assert.Equal(t, grand.Description, "Virement En Votre Faveur Youpi Youpi ")
+	assert.Equal(t, grand.Comment, "")
+	assert.Equal(t, grand.Category, "")
+	assert.Equal(t, grand.Value, -1620.0)
 }
 
 type mockReaderWithError struct {
@@ -86,7 +92,11 @@ CHEQUE EMIS
 29/02/2020;"5423696/0000000/000000000 
 CHEQUE EMIS 
 ";39,00;;
+01/01/2020;"VIREMENT EN VOTRE FAVEUR
+Youpi  
 
+
+Youpi             ";;1�620,00;
   
 Mr Jb Le Duigou     
 VISA DUAL BZH DI no  4533 07xx xxxx xx60;

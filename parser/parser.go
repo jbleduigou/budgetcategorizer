@@ -45,7 +45,7 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 	}
 
 	for _, each := range rawCSVdata {
-		if len(each) == 5 {
+		if c.isValidLine(each) {
 			date := each[0]
 			libelle := c.sanitizeDescription(each[1])
 			if c.isDebitTransaction(each) {
@@ -69,6 +69,16 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 	}
 	fmt.Printf("Found %v transactions\n", len(transactions))
 	return transactions, nil
+}
+
+func (c *csvParser) isValidLine(d []string) bool {
+	if len(d) != 5 {
+		return false
+	}
+	// The first item should be a valid date (e.g 20/03/2020)
+	// Useful for filtering out the header row
+	var validDate = regexp.MustCompile(`[0-3][0-9].[0-1][0-9].[0-9]{4}`)
+	return validDate.MatchString(d[0])
 }
 
 func (c *csvParser) isDebitTransaction(d []string) bool {
@@ -116,6 +126,12 @@ func (c *csvParser) parseAmount(a string) (float64, error) {
 	{
 		re := regexp.MustCompile(`,`)
 		creditStr = re.ReplaceAll(creditStr, []byte("."))
+	}
+	{
+		// Fixing problem with amounts larger than 999.99
+		// The input file has a separator for thousands
+		re := regexp.MustCompile(`[^0-9a-zA-Z.\-]`)
+		creditStr = re.ReplaceAll(creditStr, []byte(""))
 	}
 	credit, err := strconv.ParseFloat(string(creditStr), 64)
 	return credit, err
