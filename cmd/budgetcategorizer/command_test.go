@@ -20,7 +20,7 @@ func TestDownloadFile(t *testing.T) {
 		mock.Anything,
 		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("input/CA20191220_1142.CSV")},
 		mock.Anything).Return(int64(1337), nil)
-	c := &command{downloader: m}
+	c := &command{downloader: m, requestID: "1337"}
 
 	content, err := c.downloadFile("input/CA20191220_1142.CSV", "mybucket")
 	assert.Equal(t, []byte("test"), content)
@@ -35,7 +35,7 @@ func TestDownloadFileWithError(t *testing.T) {
 		mock.Anything,
 		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("input/CA20191220_1142.CSV")},
 		mock.Anything).Return(int64(0), fmt.Errorf("error for unit test"))
-	c := &command{downloader: m}
+	c := &command{downloader: m, requestID: "1337"}
 
 	content, err := c.downloadFile("input/CA20191220_1142.CSV", "mybucket")
 	assert.Equal(t, []byte(nil), content)
@@ -57,7 +57,7 @@ func TestExecute(t *testing.T) {
 	cat := categorizer.NewCategorizer(keywords)
 	b := mock.NewBroker()
 	b.On("Send", budget.NewTransaction("19/12/2019", "Paiement Par Carte Express Proxi Saint Thonan 17/12", "", "Courses Alimentation", 13.37)).Return(nil)
-	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "input/CA20191220_1142.CSV", categorizer: cat, broker: b}
+	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "input/CA20191220_1142.CSV", categorizer: cat, broker: b, requestID: "1337"}
 
 	c.execute()
 
@@ -73,7 +73,7 @@ func TestExecuteMissingSqsEnvVariable(t *testing.T) {
 	keywords["Express Proxi Saint Thonan"] = "Courses Alimentation"
 	cat := categorizer.NewCategorizer(keywords)
 	b := mock.NewBroker()
-	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "input/CA20191220_1142.CSV", categorizer: cat, broker: b}
+	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "input/CA20191220_1142.CSV", categorizer: cat, broker: b, requestID: "1337"}
 
 	c.execute()
 
@@ -84,7 +84,7 @@ func TestExecuteMissingSqsEnvVariable(t *testing.T) {
 
 func TestMissingSqsEnvVariable(t *testing.T) {
 	os.Unsetenv("SQS_QUEUE_URL")
-	c := &command{}
+	c := &command{requestID: "1337"}
 
 	err := c.verifyEnvVariables()
 

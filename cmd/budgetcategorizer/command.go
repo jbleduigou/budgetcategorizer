@@ -25,7 +25,7 @@ type command struct {
 }
 
 func (c *command) execute() {
-	//verify that required variable are defined
+	//verify that required variables are defined
 	err := c.verifyEnvVariables()
 	if err != nil {
 		return
