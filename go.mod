@@ -1,6 +1,6 @@
 module github.com/jbleduigou/budgetcategorizer
 
-go 1.14
+go 1.15
 
 require (
 	github.com/aws/aws-lambda-go v1.18.0
