@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-lambda-go/lambdacontext"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/sqs"
@@ -16,6 +17,9 @@ import (
 )
 
 func handleS3Event(ctx context.Context, s3Event events.S3Event) {
+	// Retrieve AWS Request ID
+	lc, _ := lambdacontext.FromContext(ctx)
+	requestID := lc.AwsRequestID
 	// Create all collaborators for command
 	sess := session.Must(session.NewSession())
 	downloader := s3manager.NewDownloader(sess)
@@ -27,7 +31,7 @@ func handleS3Event(ctx context.Context, s3Event events.S3Event) {
 		// Retrieve data from S3 event
 		s3event := record.S3
 		// Instantiate a command
-		c := &command{s3event.Bucket.Name, s3event.Object.Key, downloader, parser, categorizer, messaging.NewBroker(os.Getenv("SQS_QUEUE_URL"), sqs)}
+		c := &command{s3event.Bucket.Name, s3event.Object.Key, downloader, parser, categorizer, messaging.NewBroker(os.Getenv("SQS_QUEUE_URL"), sqs), requestID}
 		// Execute the command
 		c.execute()
 	}

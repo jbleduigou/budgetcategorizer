@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,6 +14,7 @@ import (
 )
 
 func TestDownloadFile(t *testing.T) {
+	os.Setenv("SQS_QUEUE_URL", "unit-test")
 	m := mock.NewDownloader("test")
 	m.On("Download",
 		mock.Anything,
@@ -27,6 +29,7 @@ func TestDownloadFile(t *testing.T) {
 }
 
 func TestDownloadFileWithError(t *testing.T) {
+	os.Setenv("SQS_QUEUE_URL", "unit-test")
 	m := mock.NewDownloader("")
 	m.On("Download",
 		mock.Anything,
@@ -41,6 +44,7 @@ func TestDownloadFileWithError(t *testing.T) {
 }
 
 func TestExecute(t *testing.T) {
+	os.Setenv("SQS_QUEUE_URL", "unit-test")
 	d := mock.NewDownloader("")
 	d.On("Download",
 		mock.Anything,
@@ -60,4 +64,29 @@ func TestExecute(t *testing.T) {
 	d.AssertExpectations(t)
 	p.AssertExpectations(t)
 	b.AssertExpectations(t)
+}
+func TestExecuteMissingSqsEnvVariable(t *testing.T) {
+	os.Unsetenv("SQS_QUEUE_URL")
+	d := mock.NewDownloader("")
+	p := mock.NewParser()
+	keywords := make(map[string]string)
+	keywords["Express Proxi Saint Thonan"] = "Courses Alimentation"
+	cat := categorizer.NewCategorizer(keywords)
+	b := mock.NewBroker()
+	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "input/CA20191220_1142.CSV", categorizer: cat, broker: b}
+
+	c.execute()
+
+	d.AssertExpectations(t)
+	p.AssertExpectations(t)
+	b.AssertExpectations(t)
+}
+
+func TestMissingSqsEnvVariable(t *testing.T) {
+	os.Unsetenv("SQS_QUEUE_URL")
+	c := &command{}
+
+	err := c.verifyEnvVariables()
+
+	assert.Equal(t, "No value defined for variable SQS_QUEUE_URL", err.Error())
 }
