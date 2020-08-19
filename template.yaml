@@ -1,0 +1,90 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  budgetcategorizer
+  
+  SAM Template for budgetcategorizer app
+
+Parameters:
+  InputBucketName:
+    Type: String
+  ConfigBucketName:
+    Type: String
+  ConfigObjectKey:
+    Type: String
+  OutputQueueName:
+    Type: String
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Runtime: go1.x
+    Timeout: 60
+    MemorySize: 512
+
+Resources:
+  
+  InputS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref InputBucketName
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Suspended
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: 1
+            Status: Enabled
+
+  BudgetCategorizerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: cmd/budgetcategorizer/
+      Handler: budgetcategorizer
+      Tracing: Active # https://docs.aws.amazon.com/lambda/latest/dg/lambda-x-ray.html
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          CONFIGURATION_FILE_BUCKET: !Ref ConfigBucketName
+          CONFIGURATION_FILE_OBJECT_KEY: !Ref ConfigObjectKey
+          SQS_QUEUE_URL: !Join
+                          - ''
+                          - - 'https://sqs.'
+                            - !Ref AWS::Region
+                            - '.amazonaws.com/'
+                            - !Ref 'AWS::AccountId'
+                            - '/'
+                            - !Ref OutputQueueName
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref InputBucketName
+        - S3ReadPolicy:
+            BucketName: !Ref ConfigBucketName
+        - SQSSendMessagePolicy:
+            QueueName: !Ref OutputQueueName
+      Events:
+        FileUpload:
+          Type: S3
+          Properties:
+            Bucket: !Ref InputS3Bucket
+            Events: s3:ObjectCreated:*
+            Filter: 
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: '.csv'          
+
+Outputs:
+  BudgetCategorizerFunction:
+    Description: "Budget Categorizer Lambda Function ARN"
+    Value: !GetAtt BudgetCategorizerFunction.Arn
+  BudgetCategorizerFunctionIamRole:
+    Description: "Implicit IAM Role created for Budget Categorizer function"
+    Value: !GetAtt BudgetCategorizerFunctionRole.Arn
+  S3BucketName:
+    Description: "Transactions S3 bucket"
+    Value: !Ref InputS3Bucket
