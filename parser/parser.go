@@ -17,8 +17,8 @@ type Parser interface {
 }
 
 // NewParser will provide an instance of a Parser, implementation is not exposed
-func NewParser() Parser {
-	return &csvParser{}
+func NewParser(awsRequestID string) Parser {
+	return &csvParser{requestID: awsRequestID}
 }
 
 type csvreader interface {
@@ -26,6 +26,7 @@ type csvreader interface {
 }
 
 type csvParser struct {
+	requestID string
 }
 
 func (c *csvParser) ParseTransactions(r io.Reader) ([]budget.Transaction, error) {
@@ -54,7 +55,7 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 					t := budget.NewTransaction(date, libelle, "", "Courses Alimentation", debit)
 					transactions = append(transactions, t)
 				} else {
-					fmt.Printf("%v\n", err)
+					fmt.Printf("[ERROR] %v %v\n", c.requestID, err)
 				}
 			} else {
 				credit, err := c.parseAmount(each[3])
@@ -62,12 +63,12 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 					t := budget.NewTransaction(date, libelle, "", "", -credit)
 					transactions = append(transactions, t)
 				} else {
-					fmt.Printf("%v\n", err)
+					fmt.Printf("[ERROR] %v %v\n", c.requestID, err)
 				}
 			}
 		}
 	}
-	fmt.Printf("Found %v transactions\n", len(transactions))
+	fmt.Printf("[INFO] %v Found %v transactions\n", c.requestID, len(transactions))
 	return transactions, nil
 }
 

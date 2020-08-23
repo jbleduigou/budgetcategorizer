@@ -23,15 +23,15 @@ func handleS3Event(ctx context.Context, s3Event events.S3Event) {
 	// Create all collaborators for command
 	sess := session.Must(session.NewSession())
 	downloader := s3manager.NewDownloader(sess)
-	parser := parser.NewParser()
-	config := config.GetConfiguration(downloader)
-	categorizer := categorizer.NewCategorizer(config.Keywords)
+	parser := parser.NewParser(requestID)
+	config := config.GetConfiguration(downloader, requestID)
+	categorizer := categorizer.NewCategorizer(config.Keywords, requestID)
 	sqs := sqs.New(sess)
 	for _, record := range s3Event.Records {
 		// Retrieve data from S3 event
 		s3event := record.S3
 		// Instantiate a command
-		c := &command{s3event.Bucket.Name, s3event.Object.Key, downloader, parser, categorizer, messaging.NewBroker(os.Getenv("SQS_QUEUE_URL"), sqs), requestID}
+		c := &command{s3event.Bucket.Name, s3event.Object.Key, downloader, parser, categorizer, messaging.NewBroker(os.Getenv("SQS_QUEUE_URL"), sqs, requestID), requestID}
 		// Execute the command
 		c.execute()
 	}

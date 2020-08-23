@@ -12,7 +12,7 @@ import (
 
 func TestGetConfigurationShouldUseDefault(t *testing.T) {
 	m := mock.NewDownloader("")
-	configuration := GetConfiguration(m)
+	configuration := GetConfiguration(m, "1a5931ca-dd5d-11ea-90cb-3822e2348205")
 
 	assert.Equal(t, len(configuration.Categories), 1)
 	assert.Equal(t, configuration.Categories[0], "Courses Alimentation")
@@ -32,7 +32,7 @@ func TestGetConfigurationShouldDownload(t *testing.T) {
 		mock.Anything,
 		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("configuration.yaml")},
 		mock.Anything).Return(int64(1337), nil)
-	configuration := GetConfiguration(m)
+	configuration := GetConfiguration(m, "1a5931ca-dd5d-11ea-90cb-3822e2348205")
 
 	assert.Equal(t, len(configuration.Categories), 1)
 	assert.Equal(t, configuration.Categories[0], "MyCategory")

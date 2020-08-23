@@ -12,7 +12,7 @@ func TestCategorizeFound(t *testing.T) {
 	tr := budget.NewTransaction("18/12/2019", "Paiement Par Carte Express Proxi Saint Thonan 18/12", "", "", 13.37)
 	l := make(map[string]string)
 	l["Express Proxi Saint Thonan"] = "Courses Alimentation"
-	c := NewCategorizer(l)
+	c := NewCategorizer(l, "1a5931ca-dd5d-11ea-90cb-3822e2348205")
 
 	expected := "Courses Alimentation"
 	output := c.Categorize(tr)
@@ -24,7 +24,7 @@ func TestCategorizeFound(t *testing.T) {
 func TestCategorizeNotFound(t *testing.T) {
 	tr := budget.NewTransaction("18/12/2019", "Lorem ipsum dolor sit amet", "", "", 13.37)
 	l := make(map[string]string)
-	c := NewCategorizer(l)
+	c := NewCategorizer(l, "1a5931ca-dd5d-11ea-90cb-3822e2348205")
 
 	expected := "???"
 	output := c.Categorize(tr)

@@ -13,12 +13,13 @@ type Categorizer interface {
 }
 
 // NewCategorizer will provide an instance of a Categorizer, implementation is not exposed
-func NewCategorizer(libelles map[string]string) Categorizer {
-	return &categorizerImpl{libelles: libelles}
+func NewCategorizer(libelles map[string]string, awsRequestID string) Categorizer {
+	return &categorizerImpl{libelles: libelles, requestID: awsRequestID}
 }
 
 type categorizerImpl struct {
-	libelles map[string]string
+	libelles  map[string]string
+	requestID string
 }
 
 func (c *categorizerImpl) Categorize(t budget.Transaction) budget.Transaction {
@@ -26,10 +27,10 @@ func (c *categorizerImpl) Categorize(t budget.Transaction) budget.Transaction {
 	for key, value := range c.libelles {
 		if strings.Contains(t.Description, key) {
 			output.Category = value
-			fmt.Printf("Assigning category '%s' to transaction with description '%s'\n", value, t.Description)
+			fmt.Printf("[INFO] %v Assigning category '%s' to transaction with description '%s'\n", c.requestID, value, t.Description)
 			return output
 		}
 	}
-	fmt.Printf("No matching categories found for transaction with description '%s'\n", t.Description)
+	fmt.Printf("[WARN] %v No matching categories found for transaction with description '%s'\n", c.requestID, t.Description)
 	return output
 }

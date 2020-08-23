@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sqs"
@@ -17,13 +18,14 @@ type Broker interface {
 }
 
 // NewBroker will provide an instance of a Broker, implementation is not exposed
-func NewBroker(queue string, svc sqsiface.SQSAPI) Broker {
-	return &sqsbroker{queueURL: queue, svc: svc}
+func NewBroker(queue string, svc sqsiface.SQSAPI, awsRequestID string) Broker {
+	return &sqsbroker{queueURL: queue, svc: svc, requestID: awsRequestID}
 }
 
 type sqsbroker struct {
-	queueURL string
-	svc      sqsiface.SQSAPI
+	queueURL  string
+	requestID string
+	svc       sqsiface.SQSAPI
 }
 
 func (b *sqsbroker) Send(t budget.Transaction) error {
@@ -59,10 +61,11 @@ func (b *sqsbroker) Send(t budget.Transaction) error {
 	})
 
 	if err != nil {
-		fmt.Println("Error while sending message", err)
+		fmt.Printf("[ERROR] %v Error while sending message\n", b.requestID)
+		fmt.Printf("[ERROR] %v %v\n", b.requestID, strings.ReplaceAll(err.Error(), "\n", " "))
 		return err
 	}
 
-	fmt.Printf("Message send successfully with id '%v'\n", *result.MessageId)
+	fmt.Printf("[INFO] %v Message send successfully with id '%v'\n", b.requestID, *result.MessageId)
 	return nil
 }

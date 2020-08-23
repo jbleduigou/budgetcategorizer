@@ -9,7 +9,7 @@ import (
 )
 
 func TestParseTransactions(t *testing.T) {
-	p := NewParser()
+	p := NewParser("1a5931ca-dd5d-11ea-90cb-3822e2348205")
 	transactions, _ := p.ParseTransactions(bytes.NewBufferString(content))
 	assert.Equal(t, 5, len(transactions))
 	debit := transactions[0]
