@@ -40,7 +40,7 @@ func TestSendSuccess(t *testing.T) {
 
 	m.On("SendMessage", request).Return(&sqs.SendMessageOutput{MessageId: &messageID}, nil)
 
-	b := NewBroker("https://sqs.eu-west-3.amazonaws.com/959789434/testing", m, "1a5931ca-dd5d-11ea-90cb-3822e2348205")
+	b := NewBroker("https://sqs.eu-west-3.amazonaws.com/959789434/testing", m)
 
 	err := b.Send(budget.NewTransaction("<date>", "<description>", "<comment>", "<category>", 13.37))
 
@@ -76,7 +76,7 @@ func TestSendError(t *testing.T) {
 
 	m.On("SendMessage", request).Return(nil, fmt.Errorf("Error for unit tests"))
 
-	b := NewBroker("https://sqs.eu-west-3.amazonaws.com/959789434/testing", m, "1a5931ca-dd5d-11ea-90cb-3822e2348205")
+	b := NewBroker("https://sqs.eu-west-3.amazonaws.com/959789434/testing", m)
 
 	err := b.Send(budget.NewTransaction("<date>", "<description>", "<comment>", "<category>", 13.37))
 

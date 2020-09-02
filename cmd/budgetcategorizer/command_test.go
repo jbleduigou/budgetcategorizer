@@ -20,7 +20,7 @@ func TestDownloadFile(t *testing.T) {
 		mock.Anything,
 		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("input/CA20191220_1142.CSV")},
 		mock.Anything).Return(int64(1337), nil)
-	c := &command{downloader: m, requestID: "1a5931ca-dd5d-11ea-90cb-3822e2348205"}
+	c := &command{downloader: m}
 
 	content, err := c.downloadFile("input/CA20191220_1142.CSV", "mybucket")
 	assert.Equal(t, []byte("test"), content)
@@ -35,7 +35,7 @@ func TestDownloadFileWithError(t *testing.T) {
 		mock.Anything,
 		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("input/CA20191220_1142.CSV")},
 		mock.Anything).Return(int64(0), fmt.Errorf("error for unit test"))
-	c := &command{downloader: m, requestID: "1a5931ca-dd5d-11ea-90cb-3822e2348205"}
+	c := &command{downloader: m}
 
 	content, err := c.downloadFile("input/CA20191220_1142.CSV", "mybucket")
 	assert.Equal(t, []byte(nil), content)
@@ -54,10 +54,10 @@ func TestExecute(t *testing.T) {
 	p.On("ParseTransactions", mock.Anything).Return([]budget.Transaction{budget.NewTransaction("19/12/2019", "Paiement Par Carte Express Proxi Saint Thonan 17/12", "", "", 13.37)}, nil)
 	keywords := make(map[string]string)
 	keywords["Express Proxi Saint Thonan"] = "Courses Alimentation"
-	cat := categorizer.NewCategorizer(keywords, "1a5931ca-dd5d-11ea-90cb-3822e2348205")
+	cat := categorizer.NewCategorizer(keywords)
 	b := mock.NewBroker()
 	b.On("Send", budget.NewTransaction("19/12/2019", "Paiement Par Carte Express Proxi Saint Thonan 17/12", "", "Courses Alimentation", 13.37)).Return(nil)
-	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "input/CA20191220_1142.CSV", categorizer: cat, broker: b, requestID: "1a5931ca-dd5d-11ea-90cb-3822e2348205"}
+	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "input/CA20191220_1142.CSV", categorizer: cat, broker: b}
 
 	c.execute()
 
@@ -71,9 +71,9 @@ func TestExecuteMissingSqsEnvVariable(t *testing.T) {
 	p := mock.NewParser()
 	keywords := make(map[string]string)
 	keywords["Express Proxi Saint Thonan"] = "Courses Alimentation"
-	cat := categorizer.NewCategorizer(keywords, "1a5931ca-dd5d-11ea-90cb-3822e2348205")
+	cat := categorizer.NewCategorizer(keywords)
 	b := mock.NewBroker()
-	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "input/CA20191220_1142.CSV", categorizer: cat, broker: b, requestID: "1a5931ca-dd5d-11ea-90cb-3822e2348205"}
+	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "input/CA20191220_1142.CSV", categorizer: cat, broker: b}
 
 	c.execute()
 
@@ -84,7 +84,7 @@ func TestExecuteMissingSqsEnvVariable(t *testing.T) {
 
 func TestMissingSqsEnvVariable(t *testing.T) {
 	os.Unsetenv("SQS_QUEUE_URL")
-	c := &command{requestID: "1a5931ca-dd5d-11ea-90cb-3822e2348205"}
+	c := &command{}
 
 	err := c.verifyEnvVariables()
 
