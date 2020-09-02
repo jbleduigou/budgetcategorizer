@@ -2,13 +2,13 @@ package parser
 
 import (
 	"encoding/csv"
-	"fmt"
 	"io"
 	"regexp"
 	"strconv"
 	"strings"
 
 	budget "github.com/jbleduigou/budgetcategorizer"
+	"go.uber.org/zap"
 )
 
 // Parser provides an interface for parsing raw csv transactions
@@ -17,8 +17,8 @@ type Parser interface {
 }
 
 // NewParser will provide an instance of a Parser, implementation is not exposed
-func NewParser(awsRequestID string) Parser {
-	return &csvParser{requestID: awsRequestID}
+func NewParser() Parser {
+	return &csvParser{}
 }
 
 type csvreader interface {
@@ -26,7 +26,6 @@ type csvreader interface {
 }
 
 type csvParser struct {
-	requestID string
 }
 
 func (c *csvParser) ParseTransactions(r io.Reader) ([]budget.Transaction, error) {
@@ -55,7 +54,7 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 					t := budget.NewTransaction(date, libelle, "", "Courses Alimentation", debit)
 					transactions = append(transactions, t)
 				} else {
-					fmt.Printf("[ERROR] %v %v\n", c.requestID, err)
+					zap.S().Error(err)
 				}
 			} else {
 				credit, err := c.parseAmount(each[3])
@@ -63,12 +62,12 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 					t := budget.NewTransaction(date, libelle, "", "", -credit)
 					transactions = append(transactions, t)
 				} else {
-					fmt.Printf("[ERROR] %v %v\n", c.requestID, err)
+					zap.S().Error(err)
 				}
 			}
 		}
 	}
-	fmt.Printf("[INFO] %v Found %v transactions\n", c.requestID, len(transactions))
+	zap.S().Infof("Found %v transactions", len(transactions))
 	return transactions, nil
 }
 

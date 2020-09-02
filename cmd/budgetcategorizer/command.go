@@ -12,6 +12,7 @@ import (
 	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/jbleduigou/budgetcategorizer/messaging"
 	"github.com/jbleduigou/budgetcategorizer/parser"
+	"go.uber.org/zap"
 )
 
 type command struct {
@@ -21,7 +22,6 @@ type command struct {
 	parser      parser.Parser
 	categorizer categorizer.Categorizer
 	broker      messaging.Broker
-	requestID   string
 }
 
 func (c *command) execute() {
@@ -44,32 +44,32 @@ func (c *command) execute() {
 func (c *command) verifyEnvVariables() error {
 	_, ok := os.LookupEnv("CONFIGURATION_FILE_BUCKET")
 	if !ok {
-		fmt.Printf("[WARN] %v No value defined for variable CONFIGURATION_FILE_BUCKET\n", c.requestID)
+		zap.S().Warnf("No value defined for variable CONFIGURATION_FILE_BUCKET")
 	}
 	_, ok = os.LookupEnv("CONFIGURATION_FILE_OBJECT_KEY")
 	if !ok {
-		fmt.Printf("[WARN] %v No value defined for variable CONFIGURATION_FILE_OBJECT_KEY\n", c.requestID)
+		zap.S().Warnf("No value defined for variable CONFIGURATION_FILE_OBJECT_KEY")
 	}
 	_, ok = os.LookupEnv("SQS_QUEUE_URL")
 	if !ok {
-		fmt.Printf("[ERROR] %v No value defined for variable SQS_QUEUE_URL\n", c.requestID)
+		zap.S().Errorf("No value defined for variable SQS_QUEUE_URL")
 		return fmt.Errorf("No value defined for variable SQS_QUEUE_URL")
 	}
 	return nil
 }
 
 func (c *command) downloadFile(objectKey string, bucketName string) ([]byte, error) {
-	fmt.Printf("[INFO] %v Downloading file '%v' from bucket '%v' \n", c.requestID, objectKey, bucketName)
+	zap.S().Infof("Downloading file '%v' from bucket '%v'", objectKey, bucketName)
 	buff := &aws.WriteAtBuffer{}
 	n, err := c.downloader.Download(buff, &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
 	})
 	if err != nil {
-		fmt.Printf("[ERROR] %v Failed to download file %v, %v\n", c.requestID, objectKey, err)
+		zap.S().Errorf("Failed to download file %v", objectKey, err)
 		return nil, err
 	}
-	fmt.Printf("[INFO] %v File %v downloaded, read %d bytes\n", c.requestID, objectKey, n)
+	zap.S().Infof("File %v downloaded, read %d bytes", objectKey, n)
 	return buff.Bytes(), nil
 }
 

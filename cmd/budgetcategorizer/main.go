@@ -14,27 +14,55 @@ import (
 	"github.com/jbleduigou/budgetcategorizer/config"
 	"github.com/jbleduigou/budgetcategorizer/messaging"
 	"github.com/jbleduigou/budgetcategorizer/parser"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func handleS3Event(ctx context.Context, s3Event events.S3Event) {
-	// Retrieve AWS Request ID
-	lc, _ := lambdacontext.FromContext(ctx)
-	requestID := lc.AwsRequestID
 	// Create all collaborators for command
+	initLogger(ctx)
 	sess := session.Must(session.NewSession())
 	downloader := s3manager.NewDownloader(sess)
-	parser := parser.NewParser(requestID)
-	config := config.GetConfiguration(downloader, requestID)
-	categorizer := categorizer.NewCategorizer(config.Keywords, requestID)
+	parser := parser.NewParser()
+	config := config.GetConfiguration(downloader)
+	categorizer := categorizer.NewCategorizer(config.Keywords)
 	sqs := sqs.New(sess)
 	for _, record := range s3Event.Records {
 		// Retrieve data from S3 event
 		s3event := record.S3
 		// Instantiate a command
-		c := &command{s3event.Bucket.Name, s3event.Object.Key, downloader, parser, categorizer, messaging.NewBroker(os.Getenv("SQS_QUEUE_URL"), sqs, requestID), requestID}
+		c := &command{s3event.Bucket.Name, s3event.Object.Key, downloader, parser, categorizer, messaging.NewBroker(os.Getenv("SQS_QUEUE_URL"), sqs)}
 		// Execute the command
 		c.execute()
 	}
+}
+
+func initLogger(ctx context.Context) {
+	// Retrieve AWS Request ID
+	lc, _ := lambdacontext.FromContext(ctx)
+	requestID := lc.AwsRequestID
+	cfg := zap.Config{
+		Encoding:         "json",
+		Level:            zap.NewAtomicLevelAt(zapcore.DebugLevel),
+		OutputPaths:      []string{"stdout"},
+		ErrorOutputPaths: []string{"stderr"},
+		InitialFields:    map[string]interface{}{"request-id": requestID},
+		EncoderConfig: zapcore.EncoderConfig{
+			MessageKey: "message",
+
+			LevelKey:    "level",
+			EncodeLevel: zapcore.CapitalLevelEncoder,
+
+			TimeKey:    "time",
+			EncodeTime: zapcore.ISO8601TimeEncoder,
+
+			CallerKey:    "caller",
+			EncodeCaller: zapcore.ShortCallerEncoder,
+		},
+	}
+	logger, _ := cfg.Build()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync() // flushes buffer, if any
 }
 
 func main() {

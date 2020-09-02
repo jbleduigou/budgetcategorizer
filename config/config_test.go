@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 
 func TestGetConfigurationShouldUseDefault(t *testing.T) {
 	m := mock.NewDownloader("")
-	configuration := GetConfiguration(m, "1a5931ca-dd5d-11ea-90cb-3822e2348205")
+	configuration := GetConfiguration(m)
 
 	assert.Equal(t, len(configuration.Categories), 1)
 	assert.Equal(t, configuration.Categories[0], "Courses Alimentation")
@@ -20,6 +21,28 @@ func TestGetConfigurationShouldUseDefault(t *testing.T) {
 	assert.Equal(t, configuration.Keywords["Express Proxi Saint Thonan"], "Courses Alimentation")
 	assert.Equal(t, configuration.Keywords["Courses Alimentation"], "Courses Alimentation")
 	m.AssertExpectations(t)
+}
+
+func TestGetConfigurationShouldUseDefaultGivenError(t *testing.T) {
+	yamlContent := "categories:\n  - MyCategory\nkeywords:\n  Tesco London: MyCategory"
+
+	os.Setenv("CONFIGURATION_FILE_BUCKET", "mybucket")
+	os.Setenv("CONFIGURATION_FILE_OBJECT_KEY", "configuration.yaml")
+	m := mock.NewDownloader(yamlContent)
+	m.On("Download",
+		mock.Anything,
+		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("configuration.yaml")},
+		mock.Anything).Return(int64(1337), fmt.Errorf("error for unit test"))
+	configuration := GetConfiguration(m)
+
+	assert.Equal(t, len(configuration.Categories), 1)
+	assert.Equal(t, configuration.Categories[0], "Courses Alimentation")
+	assert.Equal(t, len(configuration.Keywords), 2)
+	assert.Equal(t, configuration.Keywords["Express Proxi Saint Thonan"], "Courses Alimentation")
+	assert.Equal(t, configuration.Keywords["Courses Alimentation"], "Courses Alimentation")
+
+	os.Unsetenv("CONFIGURATION_FILE_BUCKET")
+	os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
 }
 
 func TestGetConfigurationShouldDownload(t *testing.T) {
@@ -32,7 +55,7 @@ func TestGetConfigurationShouldDownload(t *testing.T) {
 		mock.Anything,
 		&s3.GetObjectInput{Bucket: aws.String("mybucket"), Key: aws.String("configuration.yaml")},
 		mock.Anything).Return(int64(1337), nil)
-	configuration := GetConfiguration(m, "1a5931ca-dd5d-11ea-90cb-3822e2348205")
+	configuration := GetConfiguration(m)
 
 	assert.Equal(t, len(configuration.Categories), 1)
 	assert.Equal(t, configuration.Categories[0], "MyCategory")

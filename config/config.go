@@ -1,13 +1,12 @@
 package config
 
 import (
-	"fmt"
 	"os"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
@@ -27,7 +26,7 @@ type Configuration struct {
 // GetConfiguration will return the configuration.
 // Configuration can be downloaded from an S3 bucket.
 // If not available a default configuration will be returned
-func GetConfiguration(downloader s3manageriface.DownloaderAPI, requestID string) Configuration {
+func GetConfiguration(downloader s3manageriface.DownloaderAPI) Configuration {
 	bucket, ok := os.LookupEnv("CONFIGURATION_FILE_BUCKET")
 	if ok {
 		objectKey, ok := os.LookupEnv("CONFIGURATION_FILE_OBJECT_KEY")
@@ -38,14 +37,14 @@ func GetConfiguration(downloader s3manageriface.DownloaderAPI, requestID string)
 				Key:    aws.String(objectKey),
 			})
 			if err == nil {
-				fmt.Printf("[INFO] %v Downloaded configuration file '%s' from bucket '%s' \n", requestID, objectKey, bucket)
+				zap.S().Infof("Downloaded configuration file '%s' from bucket '%s'", objectKey, bucket)
 				return parseConfiguration([]byte(buff.Bytes()))
 			}
-			fmt.Printf("[WARN] %v Could not download configuration file '%s' from bucket '%s'\n", requestID, objectKey, bucket)
-			fmt.Printf("[WARN] %v %v\n", requestID, strings.ReplaceAll(err.Error(), "\n", " "))
+			zap.S().Warnf("Could not download configuration file '%s' from bucket '%s'", objectKey, bucket)
+			zap.S().Error(err)
 		}
 	}
-	fmt.Printf("[WARN] %v Using default configuration \n", requestID)
+	zap.S().Warn("Using default configuration")
 	return parseConfiguration([]byte(defaultConfiguration))
 }
 
