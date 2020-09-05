@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os"
+	"sync"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -18,14 +19,17 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+var singleton *config.Configuration
+var lock = &sync.Mutex{}
+
 func handleS3Event(ctx context.Context, s3Event events.S3Event) {
 	// Create all collaborators for command
 	initLogger(ctx)
 	sess := session.Must(session.NewSession())
 	downloader := s3manager.NewDownloader(sess)
 	parser := parser.NewParser()
-	config := config.GetConfiguration(downloader)
-	categorizer := categorizer.NewCategorizer(config.Keywords)
+	cfg := getConfig(downloader)
+	categorizer := categorizer.NewCategorizer(cfg.Keywords)
 	sqs := sqs.New(sess)
 	for _, record := range s3Event.Records {
 		// Retrieve data from S3 event
@@ -35,6 +39,19 @@ func handleS3Event(ctx context.Context, s3Event events.S3Event) {
 		// Execute the command
 		c.execute()
 	}
+}
+
+// This function looks for a config in the cache, if not found it will download it from S3
+func getConfig(downloader *s3manager.Downloader) config.Configuration {
+	lock.Lock()
+	defer lock.Unlock()
+	if singleton != nil {
+		zap.S().Info("Using cached configuration")
+		return *singleton
+	}
+	cfg := config.GetConfiguration(downloader)
+	singleton = &cfg
+	return cfg
 }
 
 func initLogger(ctx context.Context) {

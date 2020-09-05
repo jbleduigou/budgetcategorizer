@@ -31,6 +31,7 @@ func GetConfiguration(downloader s3manageriface.DownloaderAPI) Configuration {
 	if ok {
 		objectKey, ok := os.LookupEnv("CONFIGURATION_FILE_OBJECT_KEY")
 		if ok {
+			zap.S().Infof("Downloading configuration file '%s' from bucket '%s'", objectKey, bucket)
 			buff := &aws.WriteAtBuffer{}
 			_, err := downloader.Download(buff, &s3.GetObjectInput{
 				Bucket: aws.String(bucket),
