@@ -4,45 +4,24 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	budget "github.com/jbleduigou/budgetcategorizer"
 	"github.com/jbleduigou/budgetcategorizer/mock"
 	"github.com/stretchr/testify/assert"
+	testify "github.com/stretchr/testify/mock"
 )
 
 func TestSendSuccess(t *testing.T) {
 	m := mock.NewSQSClient()
-	messageID := "67043d7c-49db-43bb-af88-d0c30d62234f"
-	request := &sqs.SendMessageInput{
-		DelaySeconds: aws.Int64(10),
-		MessageAttributes: map[string]*sqs.MessageAttributeValue{
-			"Date": {
-				DataType:    aws.String("String"),
-				StringValue: aws.String("<date>"),
-			},
-			"Description": {
-				DataType:    aws.String("String"),
-				StringValue: aws.String("<description>"),
-			},
-			"Category": {
-				DataType:    aws.String("String"),
-				StringValue: aws.String("<category>"),
-			},
-			"Value": {
-				DataType:    aws.String("Number"),
-				StringValue: aws.String("13.37"),
-			},
-		},
-		MessageBody: aws.String("{\"Date\":\"\\u003cdate\\u003e\",\"Description\":\"\\u003cdescription\\u003e\",\"Comment\":\"\\u003ccomment\\u003e\",\"Category\":\"\\u003ccategory\\u003e\",\"Value\":13.37}"),
-		QueueUrl:    aws.String("https://sqs.eu-west-3.amazonaws.com/959789434/testing"),
-	}
 
-	m.On("SendMessage", request).Return(&sqs.SendMessageOutput{MessageId: &messageID}, nil)
+	m.On("SendMessageBatch", testify.MatchedBy(func(req *sqs.SendMessageBatchInput) bool { return len(req.Entries) == 10 })).Return(getSendMessageBatchOutput(), nil)
+	m.On("SendMessageBatch", testify.MatchedBy(func(req *sqs.SendMessageBatchInput) bool { return len(req.Entries) == 1 })).Return(getSendMessageBatchOutput(), nil)
 
 	b := NewBroker("https://sqs.eu-west-3.amazonaws.com/959789434/testing", m)
 
-	err := b.Send(budget.NewTransaction("<date>", "<description>", "<comment>", "<category>", 13.37))
+	list := make([]budget.Transaction, 11)
+
+	err := b.Send(list)
 
 	assert.Nil(t, err)
 	m.AssertExpectations(t)
@@ -50,36 +29,23 @@ func TestSendSuccess(t *testing.T) {
 
 func TestSendError(t *testing.T) {
 	m := mock.NewSQSClient()
-	request := &sqs.SendMessageInput{
-		DelaySeconds: aws.Int64(10),
-		MessageAttributes: map[string]*sqs.MessageAttributeValue{
-			"Date": {
-				DataType:    aws.String("String"),
-				StringValue: aws.String("<date>"),
-			},
-			"Description": {
-				DataType:    aws.String("String"),
-				StringValue: aws.String("<description>"),
-			},
-			"Category": {
-				DataType:    aws.String("String"),
-				StringValue: aws.String("<category>"),
-			},
-			"Value": {
-				DataType:    aws.String("Number"),
-				StringValue: aws.String("13.37"),
-			},
-		},
-		MessageBody: aws.String("{\"Date\":\"\\u003cdate\\u003e\",\"Description\":\"\\u003cdescription\\u003e\",\"Comment\":\"\\u003ccomment\\u003e\",\"Category\":\"\\u003ccategory\\u003e\",\"Value\":13.37}"),
-		QueueUrl:    aws.String("https://sqs.eu-west-3.amazonaws.com/959789434/testing"),
-	}
 
-	m.On("SendMessage", request).Return(nil, fmt.Errorf("Error for unit tests"))
+	m.On("SendMessageBatch", testify.MatchedBy(func(req *sqs.SendMessageBatchInput) bool { return len(req.Entries) == 5 })).Return(getSendMessageBatchOutput(), fmt.Errorf("Error for unit tests"))
 
 	b := NewBroker("https://sqs.eu-west-3.amazonaws.com/959789434/testing", m)
 
-	err := b.Send(budget.NewTransaction("<date>", "<description>", "<comment>", "<category>", 13.37))
+	list := make([]budget.Transaction, 5)
+
+	err := b.Send(list)
 
 	assert.Equal(t, err.Error(), "Error for unit tests")
 	m.AssertExpectations(t)
+}
+
+func getSendMessageBatchOutput() *sqs.SendMessageBatchOutput {
+	messageID := "5aab4335-527a-41d5-bba6-7e5cfdb8228d"
+	return &sqs.SendMessageBatchOutput{
+		Successful: []*sqs.SendMessageBatchResultEntry{&sqs.SendMessageBatchResultEntry{MessageId: &messageID}},
+		Failed:     []*sqs.BatchResultErrorEntry{&sqs.BatchResultErrorEntry{Id: &messageID, Message: &messageID}},
+	}
 }

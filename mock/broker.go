@@ -16,7 +16,7 @@ type Broker struct {
 }
 
 // Send is the method for sending a message to the broker
-func (_m *Broker) Send(_a0 budget.Transaction) error {
+func (_m *Broker) Send(_a0 []budget.Transaction) error {
 	ret := _m.Called(_a0)
 	if ret.Get(0) == nil {
 		return nil
