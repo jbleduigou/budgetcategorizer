@@ -123,6 +123,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 ## Authors
 
 * **Jean-Baptiste Le Duigou** - *Initial work* - [jbleduigou](https://github.com/jbleduigou)
+* **Cyrille Hemidy** - *Documentation improvement and some code refactoring - [chemidy](https://github.com/chemidy)
 
 See also the list of [contributors](https://github.com/jbleduigou/budgetcategorizer/contributors) who participated in this project.
 
