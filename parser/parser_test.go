@@ -16,7 +16,7 @@ func TestParseTransactions(t *testing.T) {
 	assert.Equal(t, debit.Date, "18/12/2019")
 	assert.Equal(t, debit.Description, "Paiement Par Carte Brulerie Des Capuci Brest 15/02 ")
 	assert.Equal(t, debit.Comment, "")
-	assert.Equal(t, debit.Category, "Courses Alimentation")
+	assert.Equal(t, debit.Category, "")
 	assert.Equal(t, debit.Value, 3.18)
 	credit := transactions[1]
 	assert.Equal(t, credit.Date, "18/12/2019")
@@ -28,13 +28,13 @@ func TestParseTransactions(t *testing.T) {
 	assert.Equal(t, cheque1.Date, "28/02/2020")
 	assert.Equal(t, cheque1.Description, "Cheque Emis 8936392")
 	assert.Equal(t, cheque1.Comment, "")
-	assert.Equal(t, cheque1.Category, "Courses Alimentation")
+	assert.Equal(t, cheque1.Category, "")
 	assert.Equal(t, cheque1.Value, 118.8)
 	cheque2 := transactions[3]
 	assert.Equal(t, cheque2.Date, "29/02/2020")
 	assert.Equal(t, cheque2.Description, "Cheque Emis 5423696")
 	assert.Equal(t, cheque2.Comment, "")
-	assert.Equal(t, cheque2.Category, "Courses Alimentation")
+	assert.Equal(t, cheque2.Category, "")
 	assert.Equal(t, cheque2.Value, 39.0)
 	grand := transactions[4]
 	assert.Equal(t, grand.Date, "01/01/2020")
