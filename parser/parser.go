@@ -51,7 +51,7 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 			if c.isDebitTransaction(each) {
 				debit, err := c.parseAmount(each[2])
 				if err == nil {
-					t := budget.NewTransaction(date, libelle, "", "Courses Alimentation", debit)
+					t := budget.NewTransaction(date, libelle, "", "", debit)
 					transactions = append(transactions, t)
 				} else {
 					zap.S().Error(err)
