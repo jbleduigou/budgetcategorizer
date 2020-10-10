@@ -36,9 +36,8 @@ func (c *command) execute() {
 	transactions, _ := c.parser.ParseTransactions(bytes.NewReader(content))
 	//categorize transactions
 	categorized := mapTransactions(transactions, c.categorizer.Categorize)
-	for _, t := range categorized {
-		c.broker.Send(t)
-	}
+
+	c.broker.Send(categorized)
 }
 
 func (c *command) verifyEnvVariables() error {

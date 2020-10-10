@@ -17,9 +17,9 @@ type SQS struct {
 	mock.Mock
 }
 
-// SendMessage API operation for Amazon Simple Queue Service.
-// Delivers a message to the specified queue.
-func (_m *SQS) SendMessage(_a0 *sqs.SendMessageInput) (*sqs.SendMessageOutput, error) {
+// SendMessageBatch API operation for Amazon Simple Queue Service.
+// Delivers a bunch of messages to the specified queue.
+func (_m *SQS) SendMessageBatch(_a0 *sqs.SendMessageBatchInput) (*sqs.SendMessageBatchOutput, error) {
 	ret := _m.Called(_a0)
 	if ret.Get(0) == nil && ret.Get(1) == nil {
 		return nil, nil
@@ -28,7 +28,7 @@ func (_m *SQS) SendMessage(_a0 *sqs.SendMessageInput) (*sqs.SendMessageOutput, e
 		return nil, ret.Get(1).(error)
 	}
 	if ret.Get(1) == nil {
-		return ret.Get(0).(*sqs.SendMessageOutput), nil
+		return ret.Get(0).(*sqs.SendMessageBatchOutput), nil
 	}
-	return ret.Get(0).(*sqs.SendMessageOutput), ret.Get(1).(error)
+	return ret.Get(0).(*sqs.SendMessageBatchOutput), ret.Get(1).(error)
 }

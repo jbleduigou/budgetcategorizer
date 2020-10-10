@@ -2,18 +2,18 @@ package messaging
 
 import (
 	"encoding/json"
-	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
+	"github.com/google/uuid"
 	budget "github.com/jbleduigou/budgetcategorizer"
 	"go.uber.org/zap"
 )
 
 // Broker provides an interface for sending messaging to a queue
 type Broker interface {
-	Send(t budget.Transaction) error
+	Send(t []budget.Transaction) error
 }
 
 // NewBroker will provide an instance of a Broker, implementation is not exposed
@@ -26,43 +26,48 @@ type sqsbroker struct {
 	svc      sqsiface.SQSAPI
 }
 
-func (b *sqsbroker) Send(t budget.Transaction) error {
-	amount := strconv.FormatFloat(t.Value, 'f', -1, 64)
+func (b *sqsbroker) Send(list []budget.Transaction) error {
+	batchSize := 10
+	for start := 0; start < len(list); start += batchSize {
+		end := start + batchSize
+		if end > len(list) {
+			end = len(list)
+		}
+		err := b.sendBatch(list[start:end])
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
-	payload, _ := json.Marshal(t)
-	//Decided to ignore error, it is only returned is case of:
-	// - UnsupportedTypeError: Channel, complex, and function values
-	// - UnsupportedValueError: cyclic data structures
+func (b *sqsbroker) sendBatch(list []budget.Transaction) error {
+	request := &sqs.SendMessageBatchInput{QueueUrl: &b.queueURL}
+	entries := make([]*sqs.SendMessageBatchRequestEntry, len(list))
+	for i, t := range list {
 
-	result, err := b.svc.SendMessage(&sqs.SendMessageInput{
-		DelaySeconds: aws.Int64(10),
-		MessageAttributes: map[string]*sqs.MessageAttributeValue{
-			"Date": {
-				DataType:    aws.String("String"),
-				StringValue: aws.String(t.Date),
-			},
-			"Description": {
-				DataType:    aws.String("String"),
-				StringValue: aws.String(t.Description),
-			},
-			"Category": {
-				DataType:    aws.String("String"),
-				StringValue: aws.String(t.Category),
-			},
-			"Value": {
-				DataType:    aws.String("Number"),
-				StringValue: aws.String(amount),
-			},
-		},
-		MessageBody: aws.String(string(payload)),
-		QueueUrl:    &b.queueURL,
-	})
+		//Decided to ignore error, it is only returned is case of:
+		// - UnsupportedTypeError: Channel, complex, and function values
+		// - UnsupportedValueError: cyclic data structures
+		payload, _ := json.Marshal(t)
 
+		m := &sqs.SendMessageBatchRequestEntry{
+			Id:          aws.String(uuid.New().String()),
+			MessageBody: aws.String(string(payload))}
+		entries[i] = m
+	}
+	request.SetEntries(entries)
+	zap.S().Infof("Sending a batch of %d messages to SQS", len(list))
+	result, err := b.svc.SendMessageBatch(request)
 	if err != nil {
 		zap.S().Errorf("Error while sending message", err)
 		return err
 	}
-
-	zap.S().Infof("Message send successfully with id '%v'", *result.MessageId)
+	for _, s := range result.Successful {
+		zap.S().Infof("Message send successfully with id '%v'", *s.MessageId)
+	}
+	for _, f := range result.Failed {
+		zap.S().Infof("Error while sending message with id '%v' %v", *f.Id, *f.Message)
+	}
 	return nil
 }

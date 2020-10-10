@@ -56,7 +56,7 @@ func TestExecute(t *testing.T) {
 	keywords["Express Proxi Saint Thonan"] = "Courses Alimentation"
 	cat := categorizer.NewCategorizer(keywords)
 	b := mock.NewBroker()
-	b.On("Send", budget.NewTransaction("19/12/2019", "Paiement Par Carte Express Proxi Saint Thonan 17/12", "", "Courses Alimentation", 13.37)).Return(nil)
+	b.On("Send", []budget.Transaction{budget.NewTransaction("19/12/2019", "Paiement Par Carte Express Proxi Saint Thonan 17/12", "", "Courses Alimentation", 13.37)}).Return(nil)
 	c := &command{downloader: d, parser: p, bucketName: "mybucket", objectKey: "input/CA20191220_1142.CSV", categorizer: cat, broker: b}
 
 	c.execute()
