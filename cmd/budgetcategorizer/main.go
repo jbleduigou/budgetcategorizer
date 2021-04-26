@@ -54,13 +54,35 @@ func getConfig(downloader *s3manager.Downloader) config.Configuration {
 	return cfg
 }
 
+// This function gets log level from string
+func getLogLevel(level string) zapcore.Level {
+	switch string(level) {
+	case "debug":
+		return zapcore.DebugLevel
+	case "info": // make the zero value useful
+		return zapcore.InfoLevel
+	case "warn":
+		return zapcore.WarnLevel
+	case "error":
+		return zapcore.ErrorLevel
+	case "dpanic":
+		return zapcore.DPanicLevel
+	case "panic":
+		return zapcore.PanicLevel
+	case "fatal":
+		return zapcore.FatalLevel
+	default:
+		return zapcore.DebugLevel
+	}
+}
+
 func initLogger(ctx context.Context) {
 	// Retrieve AWS Request ID
 	lc, _ := lambdacontext.FromContext(ctx)
 	requestID := lc.AwsRequestID
 	cfg := zap.Config{
 		Encoding:         "json",
-		Level:            zap.NewAtomicLevelAt(zapcore.DebugLevel),
+		Level:            zap.NewAtomicLevelAt(getLogLevel(os.Getenv("LOG_LEVEL"))),
 		OutputPaths:      []string{"stdout"},
 		ErrorOutputPaths: []string{"stderr"},
 		InitialFields:    map[string]interface{}{"request-id": requestID},
