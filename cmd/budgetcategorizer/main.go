@@ -56,24 +56,11 @@ func getConfig(downloader *s3manager.Downloader) config.Configuration {
 
 // This function gets log level from string
 func getLogLevel(level string) zapcore.Level {
-	switch string(level) {
-	case "debug":
-		return zapcore.DebugLevel
-	case "info": // make the zero value useful
-		return zapcore.InfoLevel
-	case "warn":
-		return zapcore.WarnLevel
-	case "error":
-		return zapcore.ErrorLevel
-	case "dpanic":
-		return zapcore.DPanicLevel
-	case "panic":
-		return zapcore.PanicLevel
-	case "fatal":
-		return zapcore.FatalLevel
-	default:
-		return zapcore.DebugLevel
+	var l zapcore.Level
+	if err := l.Set(level); err != nil {
+		return zap.InfoLevel
 	}
+	return l
 }
 
 func initLogger(ctx context.Context) {
