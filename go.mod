@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/aws/aws-lambda-go v1.24.0
-	github.com/aws/aws-sdk-go v1.38.66
+	github.com/aws/aws-sdk-go v1.40.9
 	github.com/google/uuid v1.2.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/stretchr/testify v1.7.0
