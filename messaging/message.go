@@ -57,17 +57,21 @@ func (b *sqsbroker) sendBatch(list []budget.Transaction) error {
 		entries[i] = m
 	}
 	request.SetEntries(entries)
-	zap.S().Infof("Sending a batch of %d messages to SQS", len(list))
+	zap.L().Info("Sending a batch of messages to SQS",
+		zap.Int("batch-size", len(list)))
 	result, err := b.svc.SendMessageBatch(request)
 	if err != nil {
-		zap.S().Errorf("Error while sending message", err)
+		zap.L().Error("Error while sending message", zap.Error(err))
 		return err
 	}
 	for _, s := range result.Successful {
-		zap.S().Infof("Message send successfully with id '%v'", *s.MessageId)
+		zap.L().Info("Message send successfully to SQS",
+			zap.Stringp("message-id", s.MessageId))
 	}
 	for _, f := range result.Failed {
-		zap.S().Infof("Error while sending message with id '%v' %v", *f.Id, *f.Message)
+		zap.L().Warn("Error while sending message to SQS",
+			zap.Stringp("error-message", f.Message),
+			zap.Stringp("message-id", f.Id))
 	}
 	return nil
 }

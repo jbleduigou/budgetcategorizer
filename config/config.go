@@ -31,21 +31,27 @@ func GetConfiguration(downloader s3manageriface.DownloaderAPI) Configuration {
 	if ok {
 		objectKey, ok := os.LookupEnv("CONFIGURATION_FILE_OBJECT_KEY")
 		if ok {
-			zap.S().Infof("Downloading configuration file '%s' from bucket '%s'", objectKey, bucket)
+			zap.L().Info("Downloading configuration file from S3",
+				zap.String("bucket", bucket),
+				zap.String("object-key", objectKey))
 			buff := &aws.WriteAtBuffer{}
 			_, err := downloader.Download(buff, &s3.GetObjectInput{
 				Bucket: aws.String(bucket),
 				Key:    aws.String(objectKey),
 			})
 			if err == nil {
-				zap.S().Infof("Downloaded configuration file '%s' from bucket '%s'", objectKey, bucket)
+				zap.L().Info("Successfully downloaded configuration file from S3",
+					zap.String("bucket", bucket),
+					zap.String("object-key", objectKey))
 				return parseConfiguration([]byte(buff.Bytes()))
 			}
-			zap.S().Warnf("Could not download configuration file '%s' from bucket '%s'", objectKey, bucket)
-			zap.S().Error(err)
+			zap.L().Error("Error while downloading configuration file",
+				zap.String("bucket", bucket),
+				zap.String("object-key", objectKey),
+				zap.Error(err))
 		}
 	}
-	zap.S().Warn("Using default configuration")
+	zap.L().Warn("Using default configuration")
 	return parseConfiguration([]byte(defaultConfiguration))
 }
 
