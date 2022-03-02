@@ -54,7 +54,7 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 					t := budget.NewTransaction(date, libelle, "", "", debit)
 					transactions = append(transactions, t)
 				} else {
-					zap.S().Error(err)
+					zap.L().Error("Error while parsing transaction amount", zap.Error(err))
 				}
 			} else {
 				credit, err := c.parseAmount(each[3])
@@ -62,12 +62,13 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 					t := budget.NewTransaction(date, libelle, "", "", -credit)
 					transactions = append(transactions, t)
 				} else {
-					zap.S().Error(err)
+					zap.L().Error("Error while parsing transaction amount", zap.Error(err))
 				}
 			}
 		}
 	}
-	zap.S().Infof("Found %v transactions", len(transactions))
+	zap.L().Info("Finish parsing the transactions file",
+		zap.Int("number-transactions", len(transactions)))
 	return transactions, nil
 }
 

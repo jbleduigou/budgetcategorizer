@@ -26,10 +26,13 @@ func (c *categorizerImpl) Categorize(t budget.Transaction) budget.Transaction {
 	for key, value := range c.libelles {
 		if strings.Contains(t.Description, key) {
 			output.Category = value
-			zap.S().Infof("Assigning category '%s' to transaction with description '%s'", value, t.Description)
+			zap.L().Info("Assigning category to transaction",
+				zap.String("category", value),
+				zap.String("transaction-description", t.Description))
 			return output
 		}
 	}
-	zap.S().Warnf("No matching categories found for transaction with description '%s'", t.Description)
+	zap.L().Warn("No matching categories found for transaction",
+		zap.String("transaction-description", t.Description))
 	return output
 }
