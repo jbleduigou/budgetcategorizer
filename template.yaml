@@ -90,6 +90,13 @@ Resources:
                   - Name: suffix
                     Value: '.csv'          
 
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: [ BudgetCategorizerFunction ] 
+    Properties:
+        RetentionInDays: 3
+        LogGroupName: !Join ['', ['/aws/lambda/', !Ref BudgetCategorizerFunction]]
+
 Outputs:
   BudgetCategorizerFunction:
     Description: "Budget Categorizer Lambda Function ARN"
