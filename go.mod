@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.136
 	github.com/google/uuid v1.3.0
 	github.com/stretchr/testify v1.8.1
-	go.uber.org/zap v1.23.0
+	go.uber.org/zap v1.24.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
