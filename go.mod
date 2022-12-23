@@ -3,7 +3,7 @@ module github.com/jbleduigou/budgetcategorizer
 go 1.19
 
 require (
-	github.com/aws/aws-lambda-go v1.36.0
+	github.com/aws/aws-lambda-go v1.36.1
 	github.com/aws/aws-sdk-go v1.44.159
 	github.com/google/uuid v1.3.0
 	github.com/stretchr/testify v1.8.1
