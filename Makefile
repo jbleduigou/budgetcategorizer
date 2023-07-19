@@ -21,7 +21,13 @@ build: clean test ## Build the executable
 zip: build ## Zip the executable so that it can be uploaded to AWS Lambda
 	zip budgetcategorizer.zip budgetcategorizer
 
+build-BudgetCategorizerFunction:
+	go get -v -t -d ./...
+	GOARCH=arm64 GOOS=linux CGO_ENABLED=0 go build -o ./cmd/budgetcategorizer/bootstrap ./cmd/budgetcategorizer
+	cp ./cmd/budgetcategorizer/bootstrap $(ARTIFACTS_DIR)/bootstrap
+
 help: ## Display this help message
 	@cat $(MAKEFILE_LIST) | grep -e "^[a-zA-Z_\-]*: *.*## *" | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .SILENT: zip build test lint vet clean help
+
