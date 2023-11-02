@@ -23,7 +23,7 @@ zip: build ## Zip the executable so that it can be uploaded to AWS Lambda
 
 build-BudgetCategorizerFunction:
 	go get -v -t -d ./...
-	GOARCH=arm64 GOOS=linux CGO_ENABLED=0 go build -o ./cmd/budgetcategorizer/bootstrap ./cmd/budgetcategorizer
+	GOARCH=arm64 GOOS=linux CGO_ENABLED=0 go build -tags lambda.norpc -o ./cmd/budgetcategorizer/bootstrap ./cmd/budgetcategorizer
 	cp ./cmd/budgetcategorizer/bootstrap $(ARTIFACTS_DIR)/bootstrap
 
 help: ## Display this help message
