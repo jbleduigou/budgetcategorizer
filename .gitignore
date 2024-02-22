@@ -2,3 +2,6 @@ budgetcategorizer
 budgetcategorizer.zip
 .aws-sam
 samconfig.toml
+
+# IntelliJ config
+.idea
