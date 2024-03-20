@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -12,7 +13,6 @@ import (
 	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/jbleduigou/budgetcategorizer/messaging"
 	"github.com/jbleduigou/budgetcategorizer/parser"
-	"go.uber.org/zap"
 )
 
 type command struct {
@@ -43,32 +43,32 @@ func (c *command) execute() {
 func (c *command) verifyEnvVariables() error {
 	_, ok := os.LookupEnv("CONFIGURATION_FILE_BUCKET")
 	if !ok {
-		zap.S().Warnf("No value defined for variable CONFIGURATION_FILE_BUCKET")
+		slog.Warn("No value defined for variable CONFIGURATION_FILE_BUCKET")
 	}
 	_, ok = os.LookupEnv("CONFIGURATION_FILE_OBJECT_KEY")
 	if !ok {
-		zap.S().Warnf("No value defined for variable CONFIGURATION_FILE_OBJECT_KEY")
+		slog.Warn("No value defined for variable CONFIGURATION_FILE_OBJECT_KEY")
 	}
 	_, ok = os.LookupEnv("SQS_QUEUE_URL")
 	if !ok {
-		zap.S().Errorf("No value defined for variable SQS_QUEUE_URL")
-		return fmt.Errorf("No value defined for variable SQS_QUEUE_URL")
+		slog.Error("No value defined for variable SQS_QUEUE_URL")
+		return fmt.Errorf("no value defined for variable SQS_QUEUE_URL")
 	}
 	return nil
 }
 
 func (c *command) downloadFile(objectKey string, bucketName string) ([]byte, error) {
-	zap.S().Infof("Downloading file '%v' from bucket '%v'", objectKey, bucketName)
+	slog.Info("Downloading file from bucket", "object-key", objectKey, "bucket-name", bucketName)
 	buff := &aws.WriteAtBuffer{}
 	n, err := c.downloader.Download(buff, &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
 	})
 	if err != nil {
-		zap.S().Errorf("Failed to download file %v", objectKey, err)
+		slog.Error("Failed to download file %v", "object-key", objectKey, "bucket-name", bucketName, "error", err)
 		return nil, err
 	}
-	zap.S().Infof("File %v downloaded, read %d bytes", objectKey, n)
+	slog.Info("File downloaded with sucess", "object-key", objectKey, "bucket-name", bucketName, "bytes-read", n)
 	return buff.Bytes(), nil
 }
 
