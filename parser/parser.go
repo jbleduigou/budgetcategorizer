@@ -3,12 +3,12 @@ package parser
 import (
 	"encoding/csv"
 	"io"
+	"log/slog"
 	"regexp"
 	"strconv"
 	"strings"
 
 	budget "github.com/jbleduigou/budgetcategorizer"
-	"go.uber.org/zap"
 )
 
 // Parser provides an interface for parsing raw csv transactions
@@ -54,7 +54,7 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 					t := budget.NewTransaction(date, libelle, "", "", debit)
 					transactions = append(transactions, t)
 				} else {
-					zap.L().Error("Error while parsing transaction amount", zap.Error(err))
+					slog.Error("Error while parsing transaction amount", "error", err)
 				}
 			} else {
 				credit, err := c.parseAmount(each[3])
@@ -62,13 +62,13 @@ func (c *csvParser) parse(reader csvreader) (transactions []budget.Transaction, 
 					t := budget.NewTransaction(date, libelle, "", "", -credit)
 					transactions = append(transactions, t)
 				} else {
-					zap.L().Error("Error while parsing transaction amount", zap.Error(err))
+					slog.Error("Error while parsing transaction amount", "error", err)
 				}
 			}
 		}
 	}
-	zap.L().Info("Finish parsing the transactions file",
-		zap.Int("number-transactions", len(transactions)))
+	slog.Info("Finish parsing the transactions file",
+		slog.Int("number-transactions", len(transactions)))
 	return transactions, nil
 }
 

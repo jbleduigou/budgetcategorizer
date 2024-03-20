@@ -1,10 +1,10 @@
 package categorizer
 
 import (
+	"log/slog"
 	"strings"
 
 	budget "github.com/jbleduigou/budgetcategorizer"
-	"go.uber.org/zap"
 )
 
 // Categorizer provides and interface for assigning a category to a transaction
@@ -26,13 +26,13 @@ func (c *categorizerImpl) Categorize(t budget.Transaction) budget.Transaction {
 	for key, value := range c.libelles {
 		if strings.Contains(t.Description, key) {
 			output.Category = value
-			zap.L().Info("Assigning category to transaction",
-				zap.String("category", value),
-				zap.String("transaction-description", t.Description))
+			slog.Info("Assigning category to transaction",
+				slog.String("category", value),
+				slog.String("transaction-description", t.Description))
 			return output
 		}
 	}
-	zap.L().Warn("No matching categories found for transaction",
-		zap.String("transaction-description", t.Description))
+	slog.Warn("No matching categories found for transaction",
+		slog.String("transaction-description", t.Description))
 	return output
 }

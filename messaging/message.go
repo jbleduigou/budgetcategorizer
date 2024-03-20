@@ -2,13 +2,13 @@ package messaging
 
 import (
 	"encoding/json"
+	"log/slog"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
 	"github.com/google/uuid"
 	budget "github.com/jbleduigou/budgetcategorizer"
-	"go.uber.org/zap"
 )
 
 // Broker provides an interface for sending messaging to a queue
@@ -57,21 +57,21 @@ func (b *sqsbroker) sendBatch(list []budget.Transaction) error {
 		entries[i] = m
 	}
 	request.SetEntries(entries)
-	zap.L().Info("Sending a batch of messages to SQS",
-		zap.Int("batch-size", len(list)))
+	slog.Info("Sending a batch of messages to SQS",
+		slog.Int("batch-size", len(list)))
 	result, err := b.svc.SendMessageBatch(request)
 	if err != nil {
-		zap.L().Error("Error while sending message", zap.Error(err))
+		slog.Error("Error while sending message", "error", err)
 		return err
 	}
 	for _, s := range result.Successful {
-		zap.L().Info("Message send successfully to SQS",
-			zap.Stringp("message-id", s.MessageId))
+		slog.Info("Message send successfully to SQS",
+			slog.String("message-id", aws.StringValue(s.MessageId)))
 	}
 	for _, f := range result.Failed {
-		zap.L().Warn("Error while sending message to SQS",
-			zap.Stringp("error-message", f.Message),
-			zap.Stringp("message-id", f.Id))
+		slog.Warn("Error while sending message to SQS",
+			slog.String("error-message", aws.StringValue(f.Message)),
+			slog.String("message-id", aws.StringValue(f.Id)))
 	}
 	return nil
 }

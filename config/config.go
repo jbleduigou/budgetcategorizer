@@ -1,12 +1,12 @@
 package config
 
 import (
+	"log/slog"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
-	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
@@ -31,27 +31,27 @@ func GetConfiguration(downloader s3manageriface.DownloaderAPI) Configuration {
 	if ok {
 		objectKey, ok := os.LookupEnv("CONFIGURATION_FILE_OBJECT_KEY")
 		if ok {
-			zap.L().Info("Downloading configuration file from S3",
-				zap.String("bucket", bucket),
-				zap.String("object-key", objectKey))
+			slog.Info("Downloading configuration file from S3",
+				slog.String("bucket", bucket),
+				slog.String("object-key", objectKey))
 			buff := &aws.WriteAtBuffer{}
 			_, err := downloader.Download(buff, &s3.GetObjectInput{
 				Bucket: aws.String(bucket),
 				Key:    aws.String(objectKey),
 			})
 			if err == nil {
-				zap.L().Info("Successfully downloaded configuration file from S3",
-					zap.String("bucket", bucket),
-					zap.String("object-key", objectKey))
+				slog.Info("Successfully downloaded configuration file from S3",
+					slog.String("bucket", bucket),
+					slog.String("object-key", objectKey))
 				return parseConfiguration([]byte(buff.Bytes()))
 			}
-			zap.L().Error("Error while downloading configuration file",
-				zap.String("bucket", bucket),
-				zap.String("object-key", objectKey),
-				zap.Error(err))
+			slog.Error("Error while downloading configuration file",
+				slog.String("bucket", bucket),
+				slog.String("object-key", objectKey),
+				slog.Any("error", err))
 		}
 	}
-	zap.L().Warn("Using default configuration")
+	slog.Warn("Using default configuration")
 	return parseConfiguration([]byte(defaultConfiguration))
 }
 

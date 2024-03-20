@@ -88,5 +88,5 @@ func TestMissingSqsEnvVariable(t *testing.T) {
 
 	err := c.verifyEnvVariables()
 
-	assert.Equal(t, "No value defined for variable SQS_QUEUE_URL", err.Error())
+	assert.Equal(t, "no value defined for variable SQS_QUEUE_URL", err.Error())
 }

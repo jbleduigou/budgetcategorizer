@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"sync"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-lambda-go/lambdacontext"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/sqs"
@@ -15,8 +15,7 @@ import (
 	"github.com/jbleduigou/budgetcategorizer/config"
 	"github.com/jbleduigou/budgetcategorizer/messaging"
 	"github.com/jbleduigou/budgetcategorizer/parser"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	slogawslambda "github.com/jbleduigou/slog-aws-lambda"
 )
 
 var singleton *config.Configuration
@@ -46,7 +45,7 @@ func getConfig(downloader *s3manager.Downloader) config.Configuration {
 	lock.Lock()
 	defer lock.Unlock()
 	if singleton != nil {
-		zap.S().Info("Using cached configuration")
+		slog.Info("Using cached configuration")
 		return *singleton
 	}
 	cfg := config.GetConfiguration(downloader)
@@ -54,41 +53,8 @@ func getConfig(downloader *s3manager.Downloader) config.Configuration {
 	return cfg
 }
 
-// This function gets log level from string
-func getLogLevel(level string) zapcore.Level {
-	var l zapcore.Level
-	if err := l.Set(level); err != nil {
-		return zap.InfoLevel
-	}
-	return l
-}
-
 func initLogger(ctx context.Context) {
-	// Retrieve AWS Request ID
-	lc, _ := lambdacontext.FromContext(ctx)
-	requestID := lc.AwsRequestID
-	cfg := zap.Config{
-		Encoding:         "json",
-		Level:            zap.NewAtomicLevelAt(getLogLevel(os.Getenv("LOG_LEVEL"))),
-		OutputPaths:      []string{"stdout"},
-		ErrorOutputPaths: []string{"stderr"},
-		InitialFields:    map[string]interface{}{"request-id": requestID},
-		EncoderConfig: zapcore.EncoderConfig{
-			MessageKey: "message",
-
-			LevelKey:    "level",
-			EncodeLevel: zapcore.CapitalLevelEncoder,
-
-			TimeKey:    "time",
-			EncodeTime: zapcore.ISO8601TimeEncoder,
-
-			CallerKey:    "caller",
-			EncodeCaller: zapcore.ShortCallerEncoder,
-		},
-	}
-	logger, _ := cfg.Build()
-	zap.ReplaceGlobals(logger)
-	defer logger.Sync() // flushes buffer, if any
+	slog.SetDefault(slog.New(slogawslambda.NewAWSLambdaHandler(ctx, nil)))
 }
 
 func main() {
