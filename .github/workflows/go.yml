@@ -19,10 +19,11 @@ jobs:
     - name: Get dependencies
       run: |
         go get -v -t -d ./...
-        if [ -f Gopkg.toml ]; then
-            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-            dep ensure
-        fi
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v4
+      with:
+        args: --timeout 120s 
 
     - name: Build
       run: make zip

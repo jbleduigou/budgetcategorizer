@@ -1,15 +1,9 @@
 .DEFAULT_GOAL := help
 
-check: test lint vet ## Runs all tests
+check: test ## Runs all tests
 
 test: ## Run the unit tests
 	go test -cover -v $(shell go list ./... | grep -v /vendor/)
-
-lint: ## Lint all files
-	go list ./... | grep -v /vendor/ | xargs -L1 /Users/jbleduig/go/bin/golint -set_exit_status
-
-vet: ## Run the vet tool
-	go vet $(shell go list ./... | grep -v /vendor/)
 
 clean: ## Clean up build artifacts
 	go clean
