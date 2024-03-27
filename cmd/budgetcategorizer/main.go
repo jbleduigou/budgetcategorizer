@@ -8,11 +8,13 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/jbleduigou/budgetcategorizer/config"
+	"github.com/jbleduigou/budgetcategorizer/iface"
 	"github.com/jbleduigou/budgetcategorizer/messaging"
 	"github.com/jbleduigou/budgetcategorizer/parser"
 	slogawslambda "github.com/jbleduigou/slog-aws-lambda"
@@ -25,9 +27,11 @@ func handleS3Event(ctx context.Context, s3Event events.S3Event) {
 	// Create all collaborators for command
 	initLogger(ctx)
 	sess := session.Must(session.NewSession())
-	downloader := s3manager.NewDownloader(sess)
+	awscfg, _ := awsconfig.LoadDefaultConfig(ctx)
 	parser := parser.NewParser()
-	cfg := getConfig(downloader)
+	downloader := s3.NewFromConfig(awscfg)
+
+	cfg := getConfig(ctx, downloader)
 	categorizer := categorizer.NewCategorizer(cfg.Keywords)
 	sqs := sqs.New(sess)
 	for _, record := range s3Event.Records {
@@ -36,19 +40,19 @@ func handleS3Event(ctx context.Context, s3Event events.S3Event) {
 		// Instantiate a command
 		c := &command{s3event.Bucket.Name, s3event.Object.Key, downloader, parser, categorizer, messaging.NewBroker(os.Getenv("SQS_QUEUE_URL"), sqs)}
 		// Execute the command
-		c.execute()
+		c.execute(ctx)
 	}
 }
 
 // This function looks for a config in the cache, if not found it will download it from S3
-func getConfig(downloader *s3manager.Downloader) config.Configuration {
+func getConfig(ctx context.Context, downloader iface.S3DownloadAPI) config.Configuration {
 	lock.Lock()
 	defer lock.Unlock()
 	if singleton != nil {
 		slog.Info("Using cached configuration")
 		return *singleton
 	}
-	cfg := config.GetConfiguration(downloader)
+	cfg := config.GetConfiguration(ctx, downloader)
 	singleton = &cfg
 	return cfg
 }
