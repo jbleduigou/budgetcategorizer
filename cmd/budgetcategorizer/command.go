@@ -2,13 +2,15 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/jbleduigou/budgetcategorizer/iface"
 	budget "github.com/jbleduigou/budgetcategorizer"
 	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/jbleduigou/budgetcategorizer/messaging"
@@ -18,20 +20,20 @@ import (
 type command struct {
 	bucketName  string
 	objectKey   string
-	downloader  s3manageriface.DownloaderAPI
+	downloader  iface.S3DownloadAPI
 	parser      parser.Parser
 	categorizer categorizer.Categorizer
 	broker      messaging.Broker
 }
 
-func (c *command) execute() {
+func (c *command) execute(ctx context.Context) {
 	//verify that required variables are defined
 	err := c.verifyEnvVariables()
 	if err != nil {
 		return
 	}
 	//download file
-	content, _ := c.downloadFile(c.objectKey, c.bucketName)
+	content, _ := c.downloadFile(ctx, c.objectKey, c.bucketName)
 	//read transactions from file
 	transactions, _ := c.parser.ParseTransactions(bytes.NewReader(content))
 	//categorize transactions
@@ -57,10 +59,9 @@ func (c *command) verifyEnvVariables() error {
 	return nil
 }
 
-func (c *command) downloadFile(objectKey string, bucketName string) ([]byte, error) {
+func (c *command) downloadFile(ctx context.Context, objectKey string, bucketName string) ([]byte, error) {
 	slog.Info("Downloading file from bucket", "object-key", objectKey, "bucket-name", bucketName)
-	buff := &aws.WriteAtBuffer{}
-	n, err := c.downloader.Download(buff, &s3.GetObjectInput{
+	output, err := c.downloader.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
 	})
@@ -68,8 +69,9 @@ func (c *command) downloadFile(objectKey string, bucketName string) ([]byte, err
 		slog.Error("Failed to download file %v", "object-key", objectKey, "bucket-name", bucketName, "error", err)
 		return nil, err
 	}
-	slog.Info("File downloaded with sucess", "object-key", objectKey, "bucket-name", bucketName, "bytes-read", n)
-	return buff.Bytes(), nil
+	slog.Info("File downloaded with sucess", "object-key", objectKey, "bucket-name", bucketName)
+	defer output.Body.Close()
+	return io.ReadAll(output.Body)
 }
 
 func mapTransactions(input []budget.Transaction, f func(budget.Transaction) budget.Transaction) []budget.Transaction {
