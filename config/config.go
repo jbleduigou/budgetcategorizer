@@ -6,9 +6,9 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/jbleduigou/budgetcategorizer/iface"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/jbleduigou/budgetcategorizer/iface"
 	"gopkg.in/yaml.v2"
 )
 
@@ -72,7 +72,7 @@ func GetConfiguration(ctx context.Context, cli iface.S3DownloadAPI) Configuratio
 
 func parseConfiguration(yml []byte) Configuration {
 	c := Configuration{}
-	yaml.Unmarshal(yml, &c)
+	_ = yaml.Unmarshal(yml, &c)
 	for _, v := range c.Categories {
 		c.Keywords[v] = v
 	}
