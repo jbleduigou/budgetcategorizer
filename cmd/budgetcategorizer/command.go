@@ -10,9 +10,9 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/jbleduigou/budgetcategorizer/iface"
 	budget "github.com/jbleduigou/budgetcategorizer"
 	"github.com/jbleduigou/budgetcategorizer/categorizer"
+	"github.com/jbleduigou/budgetcategorizer/iface"
 	"github.com/jbleduigou/budgetcategorizer/messaging"
 	"github.com/jbleduigou/budgetcategorizer/parser"
 )
@@ -39,7 +39,10 @@ func (c *command) execute(ctx context.Context) {
 	//categorize transactions
 	categorized := mapTransactions(transactions, c.categorizer.Categorize)
 
-	c.broker.Send(categorized)
+	err = c.broker.Send(categorized)
+	if err != nil {
+		slog.Error("Error while sending transaction", "error", err.Error())
+	}
 }
 
 func (c *command) verifyEnvVariables() error {

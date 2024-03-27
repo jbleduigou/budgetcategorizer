@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	budget "github.com/jbleduigou/budgetcategorizer"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // Parser provides an interface for parsing raw csv transactions
@@ -90,7 +92,7 @@ func (c *csvParser) isDebitTransaction(d []string) bool {
 }
 
 func (c *csvParser) sanitizeDescription(d string) string {
-	capitalized := strings.Title(strings.ToLower(d))
+	capitalized := cases.Title(language.French, cases.NoLower).String(strings.ToLower(d))
 	libelle := []byte(capitalized)
 	{
 		re := regexp.MustCompile(`\n`)
