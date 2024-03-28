@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	budget "github.com/jbleduigou/budgetcategorizer"
 	"github.com/jbleduigou/budgetcategorizer/mock"
 	"github.com/stretchr/testify/assert"
@@ -14,8 +15,8 @@ import (
 func TestSendSuccess(t *testing.T) {
 	m := mock.NewSQSClient()
 
-	m.On("SendMessageBatch", testify.MatchedBy(func(req *sqs.SendMessageBatchInput) bool { return len(req.Entries) == 10 })).Return(getSendMessageBatchOutput(), nil)
-	m.On("SendMessageBatch", testify.MatchedBy(func(req *sqs.SendMessageBatchInput) bool { return len(req.Entries) == 1 })).Return(getSendMessageBatchOutput(), nil)
+	m.On("SendMessageBatch", mock.Anything, testify.MatchedBy(func(req *sqs.SendMessageBatchInput) bool { return len(req.Entries) == 10 }), mock.Anything).Return(getSendMessageBatchOutput(), nil)
+	m.On("SendMessageBatch", mock.Anything, testify.MatchedBy(func(req *sqs.SendMessageBatchInput) bool { return len(req.Entries) == 1 }), mock.Anything).Return(getSendMessageBatchOutput(), nil)
 
 	b := NewBroker("https://sqs.eu-west-3.amazonaws.com/959789434/testing", m)
 
@@ -30,7 +31,7 @@ func TestSendSuccess(t *testing.T) {
 func TestSendError(t *testing.T) {
 	m := mock.NewSQSClient()
 
-	m.On("SendMessageBatch", testify.MatchedBy(func(req *sqs.SendMessageBatchInput) bool { return len(req.Entries) == 5 })).Return(getSendMessageBatchOutput(), fmt.Errorf("Error for unit tests"))
+	m.On("SendMessageBatch", mock.Anything, testify.MatchedBy(func(req *sqs.SendMessageBatchInput) bool { return len(req.Entries) == 5 }), mock.Anything).Return(getSendMessageBatchOutput(), fmt.Errorf("Error for unit tests"))
 
 	b := NewBroker("https://sqs.eu-west-3.amazonaws.com/959789434/testing", m)
 
@@ -45,7 +46,7 @@ func TestSendError(t *testing.T) {
 func getSendMessageBatchOutput() *sqs.SendMessageBatchOutput {
 	messageID := "5aab4335-527a-41d5-bba6-7e5cfdb8228d"
 	return &sqs.SendMessageBatchOutput{
-		Successful: []*sqs.SendMessageBatchResultEntry{&sqs.SendMessageBatchResultEntry{MessageId: &messageID}},
-		Failed:     []*sqs.BatchResultErrorEntry{&sqs.BatchResultErrorEntry{Id: &messageID, Message: &messageID}},
+		Successful: []types.SendMessageBatchResultEntry{{MessageId: &messageID}},
+		Failed:     []types.BatchResultErrorEntry{{Id: &messageID, Message: &messageID}},
 	}
 }
