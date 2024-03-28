@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/jbleduigou/budgetcategorizer/iface"
 	"gopkg.in/yaml.v2"
 )
@@ -46,7 +46,7 @@ func GetConfiguration(ctx context.Context, cli iface.S3DownloadAPI) Configuratio
 		Bucket: aws.String(bucket),
 		Key:    aws.String(objectKey),
 	}
-	output, err := cli.GetObject(ctx, input, nil)
+	output, err := cli.GetObject(ctx, input)
 	if err != nil {
 		slog.Error("Error while downloading configuration file",
 			slog.String("bucket", bucket),
