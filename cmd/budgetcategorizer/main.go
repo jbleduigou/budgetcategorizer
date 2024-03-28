@@ -10,8 +10,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/jbleduigou/budgetcategorizer/config"
 	"github.com/jbleduigou/budgetcategorizer/iface"
@@ -26,14 +25,13 @@ var lock = &sync.Mutex{}
 func handleS3Event(ctx context.Context, s3Event events.S3Event) {
 	// Create all collaborators for command
 	initLogger(ctx)
-	sess := session.Must(session.NewSession())
 	awscfg, _ := awsconfig.LoadDefaultConfig(ctx)
 	parser := parser.NewParser()
 	downloader := s3.NewFromConfig(awscfg)
 
 	cfg := getConfig(ctx, downloader)
 	categorizer := categorizer.NewCategorizer(cfg.Keywords)
-	sqs := sqs.New(sess)
+	sqs := sqs.NewFromConfig(awscfg)
 	for _, record := range s3Event.Records {
 		// Retrieve data from S3 event
 		s3event := record.S3

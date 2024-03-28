@@ -1,8 +1,10 @@
 package mock
 
 import (
-	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	"github.com/jbleduigou/budgetcategorizer/iface"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -13,14 +15,14 @@ func NewSQSClient() *SQS {
 
 // SQS is an implementation of the SQSAPI interface with a mock, use for testing not for production
 type SQS struct {
-	sqsiface.SQSAPI
+	iface.SQSSendMessageAPI
 	mock.Mock
 }
 
 // SendMessageBatch API operation for Amazon Simple Queue Service.
 // Delivers a bunch of messages to the specified queue.
-func (_m *SQS) SendMessageBatch(_a0 *sqs.SendMessageBatchInput) (*sqs.SendMessageBatchOutput, error) {
-	ret := _m.Called(_a0)
+func (_m *SQS) SendMessageBatch(ctx context.Context, params *sqs.SendMessageBatchInput, optFns ...func(*sqs.Options)) (*sqs.SendMessageBatchOutput, error) {
+	ret := _m.Called(ctx, params, optFns)
 	if ret.Get(0) == nil && ret.Get(1) == nil {
 		return nil, nil
 	}

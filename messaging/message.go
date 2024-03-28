@@ -1,14 +1,16 @@
 package messaging
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/google/uuid"
 	budget "github.com/jbleduigou/budgetcategorizer"
+	"github.com/jbleduigou/budgetcategorizer/iface"
 )
 
 // Broker provides an interface for sending messaging to a queue
@@ -17,13 +19,13 @@ type Broker interface {
 }
 
 // NewBroker will provide an instance of a Broker, implementation is not exposed
-func NewBroker(queue string, svc sqsiface.SQSAPI) Broker {
+func NewBroker(queue string, svc iface.SQSSendMessageAPI) Broker {
 	return &sqsbroker{queueURL: queue, svc: svc}
 }
 
 type sqsbroker struct {
 	queueURL string
-	svc      sqsiface.SQSAPI
+	svc      iface.SQSSendMessageAPI
 }
 
 func (b *sqsbroker) Send(list []budget.Transaction) error {
@@ -42,8 +44,7 @@ func (b *sqsbroker) Send(list []budget.Transaction) error {
 }
 
 func (b *sqsbroker) sendBatch(list []budget.Transaction) error {
-	request := &sqs.SendMessageBatchInput{QueueUrl: &b.queueURL}
-	entries := make([]*sqs.SendMessageBatchRequestEntry, len(list))
+	entries := make([]types.SendMessageBatchRequestEntry, len(list))
 	for i, t := range list {
 
 		//Decided to ignore error, it is only returned is case of:
@@ -51,27 +52,30 @@ func (b *sqsbroker) sendBatch(list []budget.Transaction) error {
 		// - UnsupportedValueError: cyclic data structures
 		payload, _ := json.Marshal(t)
 
-		m := &sqs.SendMessageBatchRequestEntry{
+		m := types.SendMessageBatchRequestEntry{
 			Id:          aws.String(uuid.New().String()),
 			MessageBody: aws.String(string(payload))}
 		entries[i] = m
 	}
-	request.SetEntries(entries)
+	request := &sqs.SendMessageBatchInput{
+		QueueUrl: &b.queueURL,
+		Entries:  entries,
+	}
 	slog.Info("Sending a batch of messages to SQS",
 		slog.Int("batch-size", len(list)))
-	result, err := b.svc.SendMessageBatch(request)
+	result, err := b.svc.SendMessageBatch(context.Background(), request)
 	if err != nil {
 		slog.Error("Error while sending message", "error", err)
 		return err
 	}
 	for _, s := range result.Successful {
 		slog.Info("Message send successfully to SQS",
-			slog.String("message-id", aws.StringValue(s.MessageId)))
+			slog.String("message-id", aws.ToString(s.MessageId)))
 	}
 	for _, f := range result.Failed {
 		slog.Warn("Error while sending message to SQS",
-			slog.String("error-message", aws.StringValue(f.Message)),
-			slog.String("message-id", aws.StringValue(f.Id)))
+			slog.String("error-message", aws.ToString(f.Message)),
+			slog.String("message-id", aws.ToString(f.Id)))
 	}
 	return nil
 }
