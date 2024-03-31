@@ -7,13 +7,13 @@ test: ## Run the unit tests
 
 clean: ## Clean up build artifacts
 	go clean
-	rm -f budgetcategorizer budgetcategorizer.zip
+	rm -f bootstrap bootstrap.zip
 
 build: clean test ## Build the executable
-	GOOS=linux GOARCH=amd64 go build -o budgetcategorizer ./cmd/budgetcategorizer
+	GOARCH=arm64 GOOS=linux CGO_ENABLED=0 go build -tags lambda.norpc -o ./bootstrap ./cmd/budgetcategorizer
 
 zip: build ## Zip the executable so that it can be uploaded to AWS Lambda
-	zip budgetcategorizer.zip budgetcategorizer
+	zip bootstrap.zip bootstrap
 
 build-BudgetCategorizerFunction:
 	go get -v -t -d ./...
