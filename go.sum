@@ -42,8 +42,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/jbleduigou/slog-aws-lambda v0.2.0 h1:tpgtwgVWN3/zNOxRc8zKxBIJGxBeCD9xpeWo40d3Qkc=
-github.com/jbleduigou/slog-aws-lambda v0.2.0/go.mod h1:uOeDST+OtLcEuWY8tuAcbTmvjDJ52ozrAacD5lww04s=
+github.com/jbleduigou/slog-aws-lambda v0.3.0 h1:mHuXXx+xcpQA+uvAYl9ezk8Ljq5cRrkAtOl0TCECWMU=
+github.com/jbleduigou/slog-aws-lambda v0.3.0/go.mod h1:uOeDST+OtLcEuWY8tuAcbTmvjDJ52ozrAacD5lww04s=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.5.2 h1:xuMeJ0Sdp5ZMRXx/aWO6RZxdr3beISkG5/G/aIRr3pY=
