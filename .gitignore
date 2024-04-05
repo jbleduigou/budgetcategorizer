@@ -5,3 +5,4 @@ samconfig.toml
 
 # IntelliJ config
 .idea
+*.iml

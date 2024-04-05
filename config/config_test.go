@@ -24,7 +24,25 @@ func (m *mockReadCloser) Read(p []byte) (n int, err error) {
 	return 0, io.ErrUnexpectedEOF
 }
 
-func TestGetConfigurationShouldUseDefault(t *testing.T) {
+func TestGetConfigurationShouldUseDefaultGivenNoBucket(t *testing.T) {
+	os.Unsetenv("CONFIGURATION_FILE_BUCKET")
+	os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
+
+	m := mock.NewDownloader("")
+	configuration := GetConfiguration(context.Background(), m)
+
+	assert.Equal(t, len(configuration.Categories), 1)
+	assert.Equal(t, configuration.Categories[0], "Courses Alimentation")
+	assert.Equal(t, len(configuration.Keywords), 2)
+	assert.Equal(t, configuration.Keywords["Express Proxi Saint Thonan"], "Courses Alimentation")
+	assert.Equal(t, configuration.Keywords["Courses Alimentation"], "Courses Alimentation")
+	m.AssertExpectations(t)
+}
+
+func TestGetConfigurationShouldUseDefaultGivenNoObjectKey(t *testing.T) {
+	os.Setenv("CONFIGURATION_FILE_BUCKET", "mybucket")
+	os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
+
 	m := mock.NewDownloader("")
 	configuration := GetConfiguration(context.Background(), m)
 

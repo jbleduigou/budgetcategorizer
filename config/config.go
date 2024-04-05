@@ -31,29 +31,25 @@ type Configuration struct {
 func GetConfiguration(ctx context.Context, cli iface.S3DownloadAPI) Configuration {
 	bucket, ok := os.LookupEnv("CONFIGURATION_FILE_BUCKET")
 	if !ok {
-		slog.Warn("Using default configuration")
-		return parseConfiguration([]byte(defaultConfiguration))
+		return defaultConfig()
 	}
 	objectKey, ok := os.LookupEnv("CONFIGURATION_FILE_OBJECT_KEY")
 	if !ok {
-		slog.Warn("Using default configuration")
-		return parseConfiguration([]byte(defaultConfiguration))
+		return defaultConfig()
 	}
 	slog.Info("Downloading configuration file from S3",
 		slog.String("bucket", bucket),
 		slog.String("object-key", objectKey))
-	input := &s3.GetObjectInput{
+	output, err := cli.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(objectKey),
-	}
-	output, err := cli.GetObject(ctx, input)
+	})
 	if err != nil {
 		slog.Error("Error while downloading configuration file",
 			slog.String("bucket", bucket),
 			slog.String("object-key", objectKey),
 			slog.Any("error", err))
-		slog.Warn("Using default configuration")
-		return parseConfiguration([]byte(defaultConfiguration))
+		return defaultConfig()
 	}
 	defer output.Body.Close()
 	body, err := io.ReadAll(output.Body)
@@ -62,12 +58,17 @@ func GetConfiguration(ctx context.Context, cli iface.S3DownloadAPI) Configuratio
 			slog.String("bucket", bucket),
 			slog.String("object-key", objectKey),
 			slog.Any("error", err))
-		return parseConfiguration([]byte(defaultConfiguration))
+		return defaultConfig()
 	}
 	slog.Info("Successfully downloaded configuration file from S3",
 		slog.String("bucket", bucket),
 		slog.String("object-key", objectKey))
 	return parseConfiguration(body)
+}
+
+func defaultConfig() Configuration {
+	slog.Warn("Using default configuration")
+	return parseConfiguration([]byte(defaultConfiguration))
 }
 
 func parseConfiguration(yml []byte) Configuration {
