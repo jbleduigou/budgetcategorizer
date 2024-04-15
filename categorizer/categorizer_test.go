@@ -21,6 +21,20 @@ func TestCategorizeFound(t *testing.T) {
 	assert.Equal(t, expected, string(output.Category))
 }
 
+
+func TestCategorizeFoundWithLowerCase(t *testing.T) {
+	tr := budget.NewTransaction("18/12/2019", "Paiement Par Carte express proxi saint thonan 18/12", "", "", 13.37)
+	l := make(map[string]string)
+	l["Express Proxi Saint Thonan"] = "Courses Alimentation"
+	c := NewCategorizer(l)
+
+	expected := "Courses Alimentation"
+	output := c.Categorize(tr)
+
+	fmt.Println(output)
+	assert.Equal(t, expected, string(output.Category))
+}
+
 func TestCategorizeNotFound(t *testing.T) {
 	tr := budget.NewTransaction("18/12/2019", "Lorem ipsum dolor sit amet", "", "", 13.37)
 	l := make(map[string]string)
