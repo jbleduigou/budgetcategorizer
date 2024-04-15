@@ -29,7 +29,7 @@ Parameters:
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Runtime: provided.al2
+    Runtime: provided.al2023
     Timeout: 60
     MemorySize: 512
     Architectures:
