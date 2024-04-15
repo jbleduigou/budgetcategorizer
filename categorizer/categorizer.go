@@ -24,7 +24,7 @@ type categorizerImpl struct {
 func (c *categorizerImpl) Categorize(t budget.Transaction) budget.Transaction {
 	output := budget.NewTransaction(t.Date, t.Description, t.Comment, "???", t.Value)
 	for key, value := range c.libelles {
-		if strings.Contains(t.Description, key) {
+		if strings.Contains(strings.ToLower(t.Description), strings.ToLower(key)) {
 			output.Category = value
 			slog.Info("Assigning category to transaction",
 				slog.String("category", value),
