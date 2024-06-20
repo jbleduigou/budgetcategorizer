@@ -64,6 +64,8 @@ Resources:
         Variables:
           CONFIGURATION_FILE_BUCKET: !Ref ConfigBucketName
           CONFIGURATION_FILE_OBJECT_KEY: !Ref ConfigObjectKey
+          PROFILING_S3_BUCKET: !Ref InputBucketName
+          REGION: !Ref "AWS::Region"
           SQS_QUEUE_URL: !Join
                           - ''
                           - - 'https://sqs.'
@@ -74,7 +76,7 @@ Resources:
                             - !Ref OutputQueueName
           LOG_LEVEL: !Ref LogLevel
       Policies:
-        - S3ReadPolicy:
+        - S3FullAccessPolicy:
             BucketName: !Ref InputBucketName
         - S3ReadPolicy:
             BucketName: !Ref ConfigBucketName

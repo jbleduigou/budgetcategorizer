@@ -11,6 +11,7 @@ import (
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	profile "github.com/jbleduigou/aws-lambda-profile"
 	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/jbleduigou/budgetcategorizer/config"
 	"github.com/jbleduigou/budgetcategorizer/iface"
@@ -23,6 +24,8 @@ var singleton *config.Configuration
 var lock = &sync.Mutex{}
 
 func handleS3Event(ctx context.Context, s3Event events.S3Event) {
+	defer profile.Start(profile.S3Bucket(os.Getenv("PROFILING_S3_BUCKET")), profile.AWSRegion("REGION")).Stop()
+
 	// Create all collaborators for command
 	initLogger(ctx)
 	awscfg, _ := awsconfig.LoadDefaultConfig(ctx)
