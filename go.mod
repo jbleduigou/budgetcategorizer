@@ -7,8 +7,9 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.30.0
 	github.com/aws/aws-sdk-go-v2/config v1.27.21
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.56.1
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.32.0
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.33.1
 	github.com/google/uuid v1.6.0
+	github.com/jbleduigou/aws-lambda-profile v0.0.0-20240620194905-775a89eaeaae
 	github.com/jbleduigou/slog-aws-lambda v0.3.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/net v0.26.0
@@ -35,7 +36,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/felixge/fgprof v0.9.3 // indirect
 	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd // indirect
-	github.com/jbleduigou/aws-lambda-profile v0.0.0-20240620194905-775a89eaeaae // indirect
 	github.com/pkg/profile v1.7.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
