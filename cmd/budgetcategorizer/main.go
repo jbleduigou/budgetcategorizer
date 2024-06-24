@@ -24,7 +24,7 @@ var singleton *config.Configuration
 var lock = &sync.Mutex{}
 
 func handleS3Event(ctx context.Context, s3Event events.S3Event) {
-	defer profile.Start(profile.S3Bucket(os.Getenv("PROFILING_S3_BUCKET")), profile.AWSRegion("REGION")).Stop(ctx)
+	defer profile.Start(profile.S3Bucket(os.Getenv("PROFILING_S3_BUCKET")), profile.AWSRegion(os.Getenv("REGION"))).Stop(ctx)
 
 	// Create all collaborators for command
 	initLogger(ctx)
