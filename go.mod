@@ -12,7 +12,7 @@ require (
 	github.com/jbleduigou/aws-lambda-profile v0.0.0-20240623120522-a8d9fe443948
 	github.com/jbleduigou/slog-aws-lambda v0.3.0
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/net v0.26.0
+	golang.org/x/net v0.27.0
 	golang.org/x/text v0.16.0
 	gopkg.in/yaml.v2 v2.4.0
 )
