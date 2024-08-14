@@ -27,7 +27,7 @@ If you want to fork the repo, replace the latest path element with your GitHub h
 ### Prerequisites
 
 You will need to have Go installed on your machine.  
-Currently the project uses version 1.22
+Currently the project uses version 1.23
 
 ### Building
 
