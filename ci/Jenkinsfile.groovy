@@ -1,7 +1,7 @@
 #!/usr/bin/groovy
 pipeline {
     agent {
-        docker { image 'golang:1.22' }
+        docker { image 'golang:1.23' }
     }
     environment {
         XDG_CACHE_HOME='/tmp/.cache'
