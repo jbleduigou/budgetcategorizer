@@ -13,7 +13,7 @@ require (
 	github.com/jbleduigou/slog-aws-lambda v0.3.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/net v0.28.0
-	golang.org/x/text v0.17.0
+	golang.org/x/text v0.18.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
