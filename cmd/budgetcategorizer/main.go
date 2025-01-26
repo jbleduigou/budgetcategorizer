@@ -59,7 +59,7 @@ func getConfig(ctx context.Context, downloader iface.S3DownloadAPI) config.Confi
 }
 
 func initLogger(ctx context.Context) {
-	slog.SetDefault(slog.New(slogawslambda.NewAWSLambdaHandler(ctx, nil)))
+	slog.SetDefault(slog.New(slogawslambda.NewAWSLambdaHandler(ctx, nil, "REGION")))
 }
 
 func main() {
