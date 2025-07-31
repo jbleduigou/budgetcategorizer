@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/aws/aws-lambda-go v1.49.0
-	github.com/aws/aws-sdk-go-v2 v1.37.0
+	github.com/aws/aws-sdk-go-v2 v1.37.1
 	github.com/aws/aws-sdk-go-v2/config v1.30.1
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.85.0
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.39.0
