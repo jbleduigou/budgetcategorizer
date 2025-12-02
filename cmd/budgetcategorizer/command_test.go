@@ -1,19 +1,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 	"testing"
 
-	budget "github.com/jbleduigou/budgetcategorizer"
-	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	budget "github.com/jbleduigou/budgetcategorizer"
+	"github.com/jbleduigou/budgetcategorizer/categorizer"
 	"github.com/jbleduigou/budgetcategorizer/mock"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/net/context"
 )
 
 func TestDownloadFile(t *testing.T) {
