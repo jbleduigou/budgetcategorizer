@@ -3,7 +3,7 @@ module github.com/jbleduigou/budgetcategorizer
 go 1.24.0
 
 require (
-	github.com/aws/aws-lambda-go v1.50.0
+	github.com/aws/aws-lambda-go v1.51.0
 	github.com/aws/aws-sdk-go-v2 v1.40.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.2
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.92.1
@@ -12,7 +12,6 @@ require (
 	github.com/jbleduigou/aws-lambda-profile v0.0.0-20240704142145-047370dacb76
 	github.com/jbleduigou/slog-aws-lambda v0.4.0
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/net v0.47.0
 	golang.org/x/text v0.31.0
 	gopkg.in/yaml.v2 v2.4.0
 )
