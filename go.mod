@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-lambda-go v1.52.0
 	github.com/aws/aws-sdk-go-v2 v1.41.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.7
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.95.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.96.0
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.21
 	github.com/google/uuid v1.6.0
 	github.com/jbleduigou/aws-lambda-profile v0.0.0-20240704142145-047370dacb76
