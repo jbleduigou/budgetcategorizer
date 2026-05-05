@@ -17,7 +17,10 @@ import (
 )
 
 func TestDownloadFile(t *testing.T) {
-	os.Setenv("SQS_QUEUE_URL", "unit-test")
+	err := os.Setenv("SQS_QUEUE_URL", "unit-test")
+	if err != nil {
+		t.Errorf("could not set environment variable in unit test: %s", err.Error())
+	}
 	m := mock.NewDownloader("test")
 	m.On("GetObject",
 		mock.Anything,
@@ -32,7 +35,10 @@ func TestDownloadFile(t *testing.T) {
 }
 
 func TestDownloadFileWithError(t *testing.T) {
-	os.Setenv("SQS_QUEUE_URL", "unit-test")
+	err := os.Setenv("SQS_QUEUE_URL", "unit-test")
+	if err != nil {
+		t.Errorf("could not set environment variable in unit test: %s", err.Error())
+	}
 	m := mock.NewDownloader("")
 	m.On("GetObject",
 		mock.Anything,
@@ -47,7 +53,10 @@ func TestDownloadFileWithError(t *testing.T) {
 }
 
 func TestExecute(t *testing.T) {
-	os.Setenv("SQS_QUEUE_URL", "unit-test")
+	err := os.Setenv("SQS_QUEUE_URL", "unit-test")
+	if err != nil {
+		t.Errorf("could not set environment variable in unit test: %s", err.Error())
+	}
 	d := mock.NewDownloader("")
 	d.On("GetObject",
 		mock.Anything,
@@ -69,7 +78,10 @@ func TestExecute(t *testing.T) {
 	b.AssertExpectations(t)
 }
 func TestExecuteMissingSqsEnvVariable(t *testing.T) {
-	os.Unsetenv("SQS_QUEUE_URL")
+	err := os.Unsetenv("SQS_QUEUE_URL")
+	if err != nil {
+		t.Errorf("could not unset environment variable in unit test: %s", err.Error())
+	}
 	d := mock.NewDownloader("")
 	p := mock.NewParser()
 	keywords := make(map[string]string)
@@ -86,10 +98,14 @@ func TestExecuteMissingSqsEnvVariable(t *testing.T) {
 }
 
 func TestMissingSqsEnvVariable(t *testing.T) {
-	os.Unsetenv("SQS_QUEUE_URL")
+	err := os.Unsetenv("SQS_QUEUE_URL")
+	if err != nil {
+		t.Errorf("could not unset environment variable in unit test: %s", err.Error())
+	}
+
 	c := &command{}
 
-	err := c.verifyEnvVariables()
+	err = c.verifyEnvVariables()
 
 	assert.Equal(t, "no value defined for variable SQS_QUEUE_URL", err.Error())
 }

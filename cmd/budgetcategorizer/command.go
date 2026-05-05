@@ -73,7 +73,12 @@ func (c *command) downloadFile(ctx context.Context, objectKey string, bucketName
 		return nil, err
 	}
 	slog.Info("File downloaded with sucess", "object-key", objectKey, "bucket-name", bucketName)
-	defer output.Body.Close()
+	defer func() {
+		err := output.Body.Close()
+		if err != nil {
+			panic(err)
+		}
+	}()
 	return io.ReadAll(output.Body)
 }
 
