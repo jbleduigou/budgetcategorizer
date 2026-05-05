@@ -21,7 +21,7 @@ jobs:
         go get -v -t -d ./...
 
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v6
+      uses: golangci/golangci-lint-action@v9
       with:
         args: --timeout 120s 
 
