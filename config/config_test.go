@@ -25,8 +25,14 @@ func (m *mockReadCloser) Read(p []byte) (n int, err error) {
 }
 
 func TestGetConfigurationShouldUseDefaultGivenNoBucket(t *testing.T) {
-	os.Unsetenv("CONFIGURATION_FILE_BUCKET")
-	os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
+	err := os.Unsetenv("CONFIGURATION_FILE_BUCKET")
+	if err != nil {
+		t.Errorf("could not unset environment variable in unit test: %s", err.Error())
+	}
+	err = os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
+	if err != nil {
+		t.Errorf("could not unset environment variable in unit test: %s", err.Error())
+	}
 
 	m := mock.NewDownloader("")
 	configuration := GetConfiguration(context.Background(), m)
@@ -40,8 +46,14 @@ func TestGetConfigurationShouldUseDefaultGivenNoBucket(t *testing.T) {
 }
 
 func TestGetConfigurationShouldUseDefaultGivenNoObjectKey(t *testing.T) {
-	os.Setenv("CONFIGURATION_FILE_BUCKET", "mybucket")
-	os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
+	err := os.Setenv("CONFIGURATION_FILE_BUCKET", "mybucket")
+	if err != nil {
+		t.Errorf("could not set environment variable in unit test: %s", err.Error())
+	}
+	err = os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
+	if err != nil {
+		t.Errorf("could not unset environment variable in unit test: %s", err.Error())
+	}
 
 	m := mock.NewDownloader("")
 	configuration := GetConfiguration(context.Background(), m)
@@ -57,8 +69,14 @@ func TestGetConfigurationShouldUseDefaultGivenNoObjectKey(t *testing.T) {
 func TestGetConfigurationShouldUseDefaultGivenErrorWithS3(t *testing.T) {
 	yamlContent := "categories:\n  - MyCategory\nkeywords:\n  Tesco London: MyCategory"
 
-	os.Setenv("CONFIGURATION_FILE_BUCKET", "mybucket")
-	os.Setenv("CONFIGURATION_FILE_OBJECT_KEY", "configuration.yaml")
+	err := os.Setenv("CONFIGURATION_FILE_BUCKET", "mybucket")
+	if err != nil {
+		t.Errorf("could not set environment variable in unit test: %s", err.Error())
+	}
+	err = os.Setenv("CONFIGURATION_FILE_OBJECT_KEY", "configuration.yaml")
+	if err != nil {
+		t.Errorf("could not set environment variable in unit test: %s", err.Error())
+	}
 	m := mock.NewDownloader(yamlContent)
 	m.On("GetObject",
 		mock.Anything,
@@ -72,15 +90,27 @@ func TestGetConfigurationShouldUseDefaultGivenErrorWithS3(t *testing.T) {
 	assert.Equal(t, configuration.Keywords["Express Proxi Saint Thonan"], "Courses Alimentation")
 	assert.Equal(t, configuration.Keywords["Courses Alimentation"], "Courses Alimentation")
 
-	os.Unsetenv("CONFIGURATION_FILE_BUCKET")
-	os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
+	err = os.Unsetenv("CONFIGURATION_FILE_BUCKET")
+	if err != nil {
+		t.Errorf("could not unset environment variable in unit test: %s", err.Error())
+	}
+	err = os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
+	if err != nil {
+		t.Errorf("could not unset environment variable in unit test: %s", err.Error())
+	}
 }
 
 func TestGetConfigurationShouldUseDefaultGivenErrorWithReader(t *testing.T) {
 	yamlContent := "categories:\n  - MyCategory\nkeywords:\n  Tesco London: MyCategory"
 
-	os.Setenv("CONFIGURATION_FILE_BUCKET", "mybucket")
-	os.Setenv("CONFIGURATION_FILE_OBJECT_KEY", "configuration.yaml")
+	err := os.Setenv("CONFIGURATION_FILE_BUCKET", "mybucket")
+	if err != nil {
+		t.Errorf("could not set environment variable in unit test: %s", err.Error())
+	}
+	err = os.Setenv("CONFIGURATION_FILE_OBJECT_KEY", "configuration.yaml")
+	if err != nil {
+		t.Errorf("could not set environment variable in unit test: %s", err.Error())
+	}
 	m := mock.NewDownloader(yamlContent)
 	m.On("GetObject",
 		mock.Anything,
@@ -95,15 +125,27 @@ func TestGetConfigurationShouldUseDefaultGivenErrorWithReader(t *testing.T) {
 	assert.Equal(t, configuration.Keywords["Courses Alimentation"], "Courses Alimentation")
 	m.AssertExpectations(t)
 
-	os.Unsetenv("CONFIGURATION_FILE_BUCKET")
-	os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
+	err = os.Unsetenv("CONFIGURATION_FILE_BUCKET")
+	if err != nil {
+		t.Errorf("could not unset environment variable in unit test: %s", err.Error())
+	}
+	err = os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
+	if err != nil {
+		t.Errorf("could not unset environment variable in unit test: %s", err.Error())
+	}
 }
 
 func TestGetConfigurationShouldDownload(t *testing.T) {
 	yamlContent := "categories:\n  - MyCategory\nkeywords:\n  Tesco London: MyCategory"
 
-	os.Setenv("CONFIGURATION_FILE_BUCKET", "mybucket")
-	os.Setenv("CONFIGURATION_FILE_OBJECT_KEY", "configuration.yaml")
+	err := os.Setenv("CONFIGURATION_FILE_BUCKET", "mybucket")
+	if err != nil {
+		t.Errorf("could not set environment variable in unit test: %s", err.Error())
+	}
+	err = os.Setenv("CONFIGURATION_FILE_OBJECT_KEY", "configuration.yaml")
+	if err != nil {
+		t.Errorf("could not set environment variable in unit test: %s", err.Error())
+	}
 	m := mock.NewDownloader(yamlContent)
 	m.On("GetObject",
 		mock.Anything,
@@ -118,6 +160,12 @@ func TestGetConfigurationShouldDownload(t *testing.T) {
 	assert.Equal(t, configuration.Keywords["MyCategory"], "MyCategory")
 	m.AssertExpectations(t)
 
-	os.Unsetenv("CONFIGURATION_FILE_BUCKET")
-	os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
+	err = os.Unsetenv("CONFIGURATION_FILE_BUCKET")
+	if err != nil {
+		t.Errorf("could not unset environment variable in unit test: %s", err.Error())
+	}
+	err = os.Unsetenv("CONFIGURATION_FILE_OBJECT_KEY")
+	if err != nil {
+		t.Errorf("could not unset environment variable in unit test: %s", err.Error())
+	}
 }

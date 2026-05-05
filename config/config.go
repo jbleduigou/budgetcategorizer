@@ -51,7 +51,12 @@ func GetConfiguration(ctx context.Context, cli iface.S3DownloadAPI) Configuratio
 			slog.Any("error", err))
 		return defaultConfig()
 	}
-	defer output.Body.Close()
+	defer func() {
+		err := output.Body.Close()
+		if err != nil {
+			panic(err)
+		}
+	}()
 	body, err := io.ReadAll(output.Body)
 	if err != nil {
 		slog.Error("Error while downloading configuration file",
