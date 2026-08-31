@@ -3,7 +3,7 @@ module github.com/jbleduigou/budgetcategorizer
 go 1.26.0
 
 require (
-	github.com/aws/aws-lambda-go v1.54.0
+	github.com/aws/aws-lambda-go v1.55.0
 	github.com/aws/aws-sdk-go-v2 v1.43.6
 	github.com/aws/aws-sdk-go-v2/config v1.32.37
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.107.2
